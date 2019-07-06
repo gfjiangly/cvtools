@@ -124,6 +124,4 @@ dmypy.json
 
 # custom
 .idea/
-cvtools.egg-info/
-docs/
-tests/
+
