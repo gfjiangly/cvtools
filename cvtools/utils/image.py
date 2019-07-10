@@ -14,7 +14,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import font_manager as fm
 
-from utils.boxes import x1y1wh_to_x1y1x2y2, xywh_to_x1y1x2y2
+from cvtools.utils.boxes import x1y1wh_to_x1y1x2y2, xywh_to_x1y1x2y2
 
 
 # detect_line: out_boxes, out_scores, out_classes

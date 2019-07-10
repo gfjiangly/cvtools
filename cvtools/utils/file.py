@@ -34,6 +34,15 @@ def read_file_to_list(file):
     return images_list
 
 
+# 保存list到文件
+def write_list_to_file(data, dst):
+    images_list = []
+    with open(dst, 'w') as f:
+        for line in data:
+            f.write(line+'\n')
+    return images_list
+
+
 # # 读入单个或多个文件合成一个list输出
 # def read_files_to_list(root, files):
 #     if isinstance(files, str):
@@ -56,29 +65,24 @@ def read_files_to_list(files, root=''):
     return images_list
 
 
-# 保存list到文件
-def write_list_to_file(data, dst):
-    images_list = []
-    with open(dst, 'w') as f:
-        for line in data:
-            f.write(line+'\n')
-    return images_list
-
-
-# 递归文件夹下所有文件夹，得到文件列表(含路径)
-def _get_files_list(root_dir="E:/DL/datasets/mini-vision/"):
+# 递归文件夹下所有文件夹，得到文件列表(默认含路径)
+def _get_files_list(root_dir, basename=False):
+    """此函数相当于listdir的加强版"""
     if not os.path.isdir(root_dir):
         return [root_dir]
     files_list = []
     for lists in os.listdir(root_dir):  # 相当于调用多个递归
-        files_list += _get_files_list(os.path.join(root_dir, lists))
+        if basename:
+            files_list += _get_files_list(lists)
+        else:
+            files_list += _get_files_list(os.path.join(root_dir, lists))
     return files_list
 
 
 # 递归路径输出特定类型文件列表
-def get_files_list(root, file_type=None):
+def get_files_list(root, file_type=None, basename=False):
     """file_type is a str or list."""
-    files_list = _get_files_list(root)
+    files_list = _get_files_list(root, basename)
     if file_type is not None:
         if isinstance(file_type, str):
             file_type = [file_type]
@@ -110,6 +114,22 @@ def split_data(root, files, dst, test_size=0.1):
     write_list_to_file(train_list, dst+'_train.txt')
     write_list_to_file(test_list, dst+'_test.txt')
     return train_list, test_list
+
+
+# 将dict随机按比例分成两部分
+def split_dict(data_dict, test_size=0.1):
+    import random
+    dict_key = list(data_dict.keys())
+    random.shuffle(dict_key)
+    train_list = dict_key[int(len(dict_key)*test_size):]
+    test_list = dict_key[0:int(len(dict_key)*test_size)]
+    train_dict = {}
+    for key in train_list:
+        train_dict[key] = data_dict[key]
+    test_dict = {}
+    for key in test_list:
+        test_dict[key] = data_dict[key]
+    return train_dict, test_dict
 
 
 # 批量将文件名中空格替换为下划线

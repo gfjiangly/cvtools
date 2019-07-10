@@ -60,7 +60,7 @@ class Timer(object):
         self.average_time = 0.
 
 
-def get_nowtime_str(form='%Y/%m/%d %H:%M:%S'):
+def get_now_time_str(form='%Y/%m/%d %H:%M:%S'):
     import time
     now = time.strftime(form, time.localtime(time.time()))
     return now

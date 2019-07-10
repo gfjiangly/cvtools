@@ -1,0 +1,11 @@
+0: 1
+1: 1
+男性: 1
+女性: 1
+male: 1
+female: 1
+Face: 1
+face: 1
+look: 1
+Head: 1
+head: 1
