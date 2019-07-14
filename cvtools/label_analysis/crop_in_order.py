@@ -6,8 +6,7 @@
 import cv2
 import numpy as np
 
-from cvtools.utils.boxes import x1y1wh_to_x1y1x2y2
-from cvtools.utils.iou import bbox_overlaps
+import cvtools
 
 
 class CropInOder(object):
@@ -56,9 +55,9 @@ class CropInOder(object):
             for i, crop_img in enumerate(crop_imgs):
                 crop_h, crop_w, _ = crop_img.shape
                 crop_x1, crop_y1 = starts[i]
-                img_box = x1y1wh_to_x1y1x2y2(np.array([[crop_x1, crop_y1, crop_w, crop_h]]))
-                gt_boxes = x1y1wh_to_x1y1x2y2(boxes)
-                iof = bbox_overlaps(gt_boxes.reshape(-1, 4), img_box.reshape(-1, 4), mode='iof').reshape(-1)
+                img_box = cvtools.x1y1wh_to_x1y1x2y2(np.array([[crop_x1, crop_y1, crop_w, crop_h]]))
+                gt_boxes = cvtools.x1y1wh_to_x1y1x2y2(boxes)
+                iof = cvtools.bbox_overlaps(gt_boxes.reshape(-1, 4), img_box.reshape(-1, 4), mode='iof').reshape(-1)
                 ids = iof == 1.
                 # boxes_in = boxes[ids]
                 labels_in = labels[ids]
@@ -72,7 +71,7 @@ class CropInOder(object):
         return crop_imgs, starts, [labels]
 
 
-if __name__ in '__main__':
+if __name__ == '__main__':
     crop_in_order = CropInOder()
     img_file = 'F:/data/rssrai2019_object_detection/val/images/P0060.png'
     img = cv2.imread(img_file)

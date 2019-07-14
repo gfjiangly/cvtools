@@ -67,11 +67,20 @@ def read_files_to_list(files, root=''):
 
 # 递归文件夹下所有文件夹，得到文件列表(默认含路径)
 def _get_files_list(root_dir, basename=False):
-    """此函数相当于listdir的加强版"""
+    """get all files under the given path.
+
+    Args:
+        root_dir(str): must use absolute path to get files.
+        basename(bool): if is True, file will not include path,
+            else includes path.
+
+    Returns:
+        list: all files under the given path.
+    """
     if not os.path.isdir(root_dir):
         return [root_dir]
     files_list = []
-    for lists in os.listdir(root_dir):  # 相当于调用多个递归
+    for lists in os.listdir(root_dir):  # recursive
         if basename:
             files_list += _get_files_list(lists)
         else:
@@ -161,11 +170,17 @@ def check_rept(file):
 
 
 def makedirs(path):
+    if path is None or path == '':
+        return False
+    if os.path.isfile(path):    # 是文件并且已存在
+        return False
     try:
+        if '.' in path:
+            path = os.path.dirname(path)
         if not os.path.exists(path):
             os.makedirs(path)
-    except:
-        print('make dirs failed!')
+    except Exception as e:
+        print(e, 'make dirs failed!')
         return False
     return True
 
@@ -200,6 +215,16 @@ def read_key_value(file):
         value = line[1].strip()
         return_dict[key] = value
     return return_dict
+
+
+# 写字典到文件中（非格式化），每行以字符':'分割key和value
+def write_key_value(data, to_file):
+    if not isinstance(data, dict):
+        return
+    makedirs(to_file)
+    with open(to_file, 'w', encoding='utf8') as f:
+        for key, value in data.items():
+            f.write('{}: {}\n'.format(key, value))
 
 
 # 文件夹名批量替换子串
@@ -248,6 +273,11 @@ def save_json(data, to_file='data.json'):
     with open(to_file, 'w') as f:
         json.dump(data, f)  # using indent=4 show more friendly
     print('!save {} finished'.format(to_file))
+
+
+def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
+    if not os.path.isfile(filename):
+        raise FileNotFoundError(msg_tmpl.format(filename))
 
 
 if __name__ == "__main__":
