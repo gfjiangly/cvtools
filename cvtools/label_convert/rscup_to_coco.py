@@ -140,9 +140,9 @@ class Rscup2COCO(object):
 
 
 if __name__ == '__main__':
-    label_root = 'D:/data/rssrai2019_object_detection/train/labelTxt/'
+    label_root = '../label_analysis/rscup/crop/train/labelTxt+crop/'
     image_root = 'D:/data/rssrai2019_object_detection/train/images/'
     path_replace = {'\\': '/'}
     rscup_to_coco = Rscup2COCO(label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
-    rscup_to_coco.convert()
-    rscup_to_coco.save_json('rscup/rscup_x1y1wh_polygen.json')
+    rscup_to_coco.convert(use_crop=True)
+    rscup_to_coco.save_json('rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json')

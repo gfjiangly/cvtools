@@ -70,6 +70,8 @@ def imwrite(img, file_path, params=None, auto_mkdir=True):
     Returns:
         bool: Successful or not.
     """
+    if not isinstance(img, np.ndarray):
+        raise TypeError('"img" must be a numpy array!')
     if auto_mkdir:
         cvtools.makedirs(file_path)
     return cv.imwrite(file_path, img, params)
@@ -118,7 +120,8 @@ def draw_rect_test_labels(src, dst, first=sys.maxsize):
                 im.save(dst+img_name)
 
 
-def draw_boxes_texts(img, boxes, texts=None, colors=None, draw_start=True, box_format='x1y1x2y2'):
+def draw_boxes_texts(img, boxes, texts=None, colors=None, line_width=1, draw_start=True,
+                     box_format='x1y1x2y2'):
     """support box format: x1y1x2y2(default), x1y1wh, xywh, xywha, x1y1x2y2x3y3x4y4"""
     if len(boxes) == 0:
         return img
@@ -140,7 +143,7 @@ def draw_boxes_texts(img, boxes, texts=None, colors=None, draw_start=True, box_f
     # if colors is None:
     #     colors = [(255, 0, 0), (0, 255, 255)]
     text_color = (0, 255, 255)
-    thickness = 1
+    thickness = line_width
     font = cv.FONT_HERSHEY_SIMPLEX
     for idx, box in enumerate(boxes):
         box_color = (0, 0, 255) if colors is None else colors[idx]  # default color: red, BGR order

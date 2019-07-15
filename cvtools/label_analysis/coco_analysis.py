@@ -196,6 +196,7 @@ class COCOAnalysis(object):
             print('crop {}'.format(entry['file_name']))
             image_name = entry['file_name']
             image_file = osp.join(self.img_prefix, image_name)
+            img_name_no_suffix, img_suffix = osp.splitext(image_name)
             img = cv2.imdecode(np.fromfile(image_file, dtype=np.uint8), cv2.IMREAD_COLOR)  # support chinese
             # img = cv2.imread(image_file)  # not support chinese
             if img is None:
@@ -205,15 +206,19 @@ class COCOAnalysis(object):
             objs = self.COCO.loadAnns(ann_ids)
             boxes = [obj['bbox'] for obj in objs]
             # labels = [obj['category_id'] for obj in objs]
+            if len(boxes) == 0:
+                continue
             crop_imgs, starts, new_ann_ids = crop(img, np.array(boxes), np.array(ann_ids))
+            # crops = []
             for crop_i, crop_img in enumerate(crop_imgs):
-                img_name, img_suffix = osp.splitext(image_name)
                 # new_img_name = img_name + '_' + str(crop_i) + img_suffix
                 # cv2.imwrite(os.path.join(save_root, 'images', new_img_name), crop_img)
                 sx, sy = starts[crop_i]
                 h, w, _ = crop_img.shape
                 ex, ey = sx + w, sy + h
-                txt_name = '_'.join([img_name]+[str(crop_i)]+list(map(str, [sx, sy, ex, ey]))) + '.txt'
+                # crops.append([sx+3, sy+3, ex-3, ey-3])
+                txt_name = '_'.join([img_name_no_suffix] +
+                                    [str(crop_i)]+list(map(str, [sx, sy, ex, ey]))) + '.txt'
                 txt_content = ''
                 crop_objs = self.COCO.loadAnns(new_ann_ids[crop_i])
                 if len(crop_objs) == 0:
@@ -227,15 +232,17 @@ class COCOAnalysis(object):
                     line.append(cat)
                     line.append(diffcult)
                     txt_content += ' '.join(line) + '\n'
-                with open(osp.join(save_root, 'labelTxt+crop', txt_name), 'w') as f:
-                    f.write(txt_content)
+                cvtools.strwrite(txt_content, osp.join(save_root, 'labelTxt+crop', txt_name))
+            # if len(crops) > 0:
+            #     draw_img = cvtools.draw_boxes_texts(img, crops, line_width=3, box_format='x1y1x2y2')
+            #     cvtools.imwrite(draw_img, osp.join(save_root, 'images', img_name_no_suffix+'.jpg'))
 
 
 if __name__ == '__main__':
     img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
     ann_file = '../label_convert/rscup/rscup_x1y1wh_polygen.json'
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    # coco_analysis.crop_in_order('F:/data/rssrai2019_object_detection/crop/val', box_format='x1y1wh')
+    coco_analysis.crop_in_order('rscup/crop/train', box_format='x1y1wh')
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
     # coco_analysis.vis_boxes('rscup/vis_rscup/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
@@ -243,4 +250,4 @@ if __name__ == '__main__':
     # coco_analysis.split_dataset(to_file='Arcsoft/gender_elevator/gender_elevator.json', val_size=1./3.)
     # coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
     # coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))
-    coco_analysis.cluster_boxes_cat('rscup/bbox_distribution/', cluster_names=('area', ))
+    # coco_analysis.cluster_boxes_cat('rscup/bbox_distribution/', cluster_names=('area', ))

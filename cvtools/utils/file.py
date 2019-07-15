@@ -280,6 +280,12 @@ def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
         raise FileNotFoundError(msg_tmpl.format(filename))
 
 
+def strwrite(data, to_file):
+    makedirs(to_file)
+    with open(to_file, 'w') as f:
+        f.write(data)
+
+
 if __name__ == "__main__":
     # # 测试通过，2019.6.28
     # txt_laber_list = get_files_list('F:/data/detection', file_type=('.txt', '.jpeg'))

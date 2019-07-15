@@ -20,15 +20,11 @@ class CropInOder(object):
         h, w, c = img.shape
         crop_imgs = []
         starts = []
-        x_stop = False
+        # fix crop bug!
         y_stop = False
         for sy in range(0, h, int(self.height_size*(1.-self.overlap))):
-            if y_stop:
-                break
+            x_stop = False
             for sx in range(0, w, int(self.width_size * (1. - self.overlap))):
-                if x_stop:
-                    x_stop = False
-                    break
                 ex = sx + self.width_size
                 if ex > w:
                     ex = w
@@ -45,9 +41,15 @@ class CropInOder(object):
                     y_stop = True
                 crop_imgs.append(img[sy:ey, sx:ex])
                 starts.append((sx, sy))
+                if x_stop:
+                    break
+            if y_stop:
+                break
 
-        if boxes is not None and labels is not None and len(crop_imgs) > 1:
+        if boxes is not None and labels is not None and \
+                len(labels) > 0 and len(crop_imgs) > 1:
             assert len(boxes) == len(labels)
+            gt_boxes = cvtools.x1y1wh_to_x1y1x2y2(boxes)
             return_imgs = []
             return_starts = []
             # return_boxes = []
@@ -56,7 +58,6 @@ class CropInOder(object):
                 crop_h, crop_w, _ = crop_img.shape
                 crop_x1, crop_y1 = starts[i]
                 img_box = cvtools.x1y1wh_to_x1y1x2y2(np.array([[crop_x1, crop_y1, crop_w, crop_h]]))
-                gt_boxes = cvtools.x1y1wh_to_x1y1x2y2(boxes)
                 iof = cvtools.bbox_overlaps(gt_boxes.reshape(-1, 4), img_box.reshape(-1, 4), mode='iof').reshape(-1)
                 ids = iof == 1.
                 # boxes_in = boxes[ids]
