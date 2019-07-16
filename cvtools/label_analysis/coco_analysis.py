@@ -240,13 +240,13 @@ class COCOAnalysis(object):
 
 if __name__ == '__main__':
     img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
-    ann_file = '../label_convert/rscup/rscup_x1y1wh_polygen.json'
+    ann_file = '../label_convert/rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json'
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    coco_analysis.crop_in_order('rscup/crop/train', box_format='x1y1wh')
+    # coco_analysis.crop_in_order('rscup/crop/train', box_format='x1y1wh')
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
-    # coco_analysis.vis_boxes('rscup/vis_rscup/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
-    # coco_analysis.vis_boxes('rscup/vis_rscup/', vis='bbox', box_format='x1y1wh')
+    # coco_analysis.vis_boxes('rscup/vis_rscup_crop/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
+    coco_analysis.vis_boxes('rscup/vis_rscup_crop_box/', vis='bbox', box_format='x1y1wh')
     # coco_analysis.split_dataset(to_file='Arcsoft/gender_elevator/gender_elevator.json', val_size=1./3.)
     # coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
     # coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))

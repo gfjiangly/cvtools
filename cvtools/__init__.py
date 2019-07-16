@@ -8,3 +8,5 @@ from .pycocotools import *
 from .utils import *
 from .label_convert import *
 from .label_analysis import *
+from .version import __version__
+
