@@ -37,6 +37,7 @@ def read_file_to_list(file):
 # 保存list到文件
 def write_list_to_file(data, dst):
     images_list = []
+    makedirs(dst)
     with open(dst, 'w') as f:
         for line in data:
             f.write(line+'\n')
@@ -161,11 +162,17 @@ def check_rept(file):
 
 
 def makedirs(path):
+    if path is None or path == '':
+        return False
+    if os.path.isfile(path):    # 是文件并且已存在
+        return False
     try:
+        if '.' in path:
+            path = os.path.dirname(path)
         if not os.path.exists(path):
             os.makedirs(path)
-    except:
-        print('make dirs failed!')
+    except Exception as e:
+        print(e, 'make dirs failed!')
         return False
     return True
 

@@ -17,6 +17,20 @@ from matplotlib import font_manager as fm
 from cvtools.utils.boxes import x1y1wh_to_x1y1x2y2, xywh_to_x1y1x2y2
 
 
+# 使用PIL lazy方式读图像，防止读大图像死机; 支持中文路径
+def imread(file, flag=None):
+    try:
+        "PIL: Open an image file, without loading the raster data"
+        Image.open(file)
+        # im = cv2.imdecode(np.fromfile(image_name, dtype=np.uint8), cv2.IMREAD_COLOR)
+    except (FileNotFoundError, Image.DecompressionBombError) as e:
+        print(e)
+        return None
+    if flag is None:
+        flag = cv.IMREAD_COLOR
+    return cv.imdecode(np.fromfile(file, dtype=np.uint8), flag)
+
+
 # detect_line: out_boxes, out_scores, out_classes
 def save_rect_image(image_path, detect_line, th_h=0.9, th_l=0.5):
     image = Image.open(image_path)
