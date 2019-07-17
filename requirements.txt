@@ -1,5 +1,5 @@
-matplotlib==3.1.1
-numpy==1.16.4
-opencv-python==4.1.0.25
-Pillow==6.1.0
-tqdm==4.32.2
+matplotlib
+numpy>=1.11.1
+opencv-python
+Pillow
+tqdm
