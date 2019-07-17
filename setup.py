@@ -14,7 +14,7 @@ install_requires = [
 
 
 def get_version():
-    version_file = './version.py'
+    version_file = 'cvtools/version.py'
     with open(version_file, 'r', encoding='utf-8') as f:
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']

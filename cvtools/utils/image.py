@@ -14,7 +14,67 @@ import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import font_manager as fm
 
-from cvtools.utils.boxes import x1y1wh_to_x1y1x2y2, xywh_to_x1y1x2y2
+import cvtools
+
+
+from cv2 import IMREAD_COLOR, IMREAD_GRAYSCALE, IMREAD_UNCHANGED
+
+imread_flags = {
+    'color': IMREAD_COLOR,
+    'grayscale': IMREAD_GRAYSCALE,
+    'unchanged': IMREAD_UNCHANGED
+}
+
+
+# 使用PIL lazy方式读图像，防止读大图像死机; 支持中文路径
+def imread(img_or_path, flag='color'):
+    """Read an image.
+
+    Args:
+        img_or_path (ndarray or str): Either a numpy array or image path.
+            If it is a numpy array (loaded image), then it will be returned
+            as is.
+        flag (str): Flags specifying the color type of a loaded image,
+            candidates are `color`, `grayscale` and `unchanged`.
+
+    Returns:
+        ndarray: Loaded image array.
+    """
+    if isinstance(img_or_path, np.ndarray):
+        return img_or_path
+    elif isinstance(img_or_path, str):
+        flag = imread_flags[flag] if isinstance(flag, str) else flag
+        cvtools.check_file_exist(img_or_path, 'img file does not exist: {}'.format(img_or_path))
+        try:
+            "PIL: Open an image file, without loading the raster data"
+            Image.open(img_or_path)
+            # im = cv2.imdecode(np.fromfile(image_name, dtype=np.uint8), cv2.IMREAD_COLOR)
+        except (FileNotFoundError, Image.DecompressionBombError) as e:
+            print(e)
+            return None
+        return cv.imdecode(np.fromfile(img_or_path, dtype=np.uint8), flag)
+    else:
+        raise TypeError('"img" must be a numpy array or a filename')
+
+
+def imwrite(img, file_path, params=None, auto_mkdir=True):
+    """Write image to file
+
+    Args:
+        img (ndarray): Image array to be written.
+        file_path (str): Image file path.
+        params (None or list): Same as opencv's :func:`imwrite` interface.
+        auto_mkdir (bool): If the parent folder of `file_path` does not exist,
+            whether to create it automatically.
+
+    Returns:
+        bool: Successful or not.
+    """
+    if not isinstance(img, np.ndarray):
+        raise TypeError('"img" must be a numpy array!')
+    if auto_mkdir:
+        cvtools.makedirs(file_path)
+    return cv.imwrite(file_path, img, params)
 
 
 # 使用PIL lazy方式读图像，防止读大图像死机; 支持中文路径
@@ -74,7 +134,8 @@ def draw_rect_test_labels(src, dst, first=sys.maxsize):
                 im.save(dst+img_name)
 
 
-def draw_box_text(img, boxes, texts=None, colors=None, draw_start=True, box_format='x1y1x2y2'):
+def draw_boxes_texts(img, boxes, texts=None, colors=None, line_width=1, draw_start=True,
+                     box_format='x1y1x2y2'):
     """support box format: x1y1x2y2(default), x1y1wh, xywh, xywha, x1y1x2y2x3y3x4y4"""
     if len(boxes) == 0:
         return img
@@ -96,18 +157,18 @@ def draw_box_text(img, boxes, texts=None, colors=None, draw_start=True, box_form
     # if colors is None:
     #     colors = [(255, 0, 0), (0, 255, 255)]
     text_color = (0, 255, 255)
-    thickness = 1
+    thickness = line_width
     font = cv.FONT_HERSHEY_SIMPLEX
     for idx, box in enumerate(boxes):
         box_color = (0, 0, 255) if colors is None else colors[idx]  # default color: red, BGR order
         if box_format == 'x1y1x2y2':
             cv.rectangle(img, tuple(box[0:2]), tuple(box[2:4]), box_color, thickness)
         elif box_format == 'x1y1wh':
-            box[0:4] = x1y1wh_to_x1y1x2y2(list(box[0:4]))
+            box[0:4] = cvtools.x1y1wh_to_x1y1x2y2(list(box[0:4]))
             cv.rectangle(img, tuple(box[0:2]), tuple(box[2:4]), box_color, thickness)
             pass
         elif box_format == 'xywh':
-            box[0:4] = xywh_to_x1y1x2y2(list(box[0:4]))
+            box[0:4] = cvtools.xywh_to_x1y1x2y2(list(box[0:4]))
             cv.rectangle(img, tuple(box[0:2]), tuple(box[2:4]), box_color, thickness)
         elif box_format == 'xywha':
             rrect = tuple(box[:2]), tuple(box[2:4]), box[4]

@@ -11,35 +11,39 @@ import cv2
 from PIL import Image
 import numpy as np
 
-import cvtools.utils.file as file_utils
-from cvtools.utils.timer import Timer, get_now_time_str
+import cvtools
 
 
 class Rscup2COCO(object):
-    def __init__(self, label_root, image_root, path_replace=None, box_form='x1y1wh'):
+    def __init__(self,
+                 label_root,
+                 image_root,
+                 cls_map='rscup/cls_id_map.txt',
+                 path_replace=None,
+                 box_form='x1y1wh'):
         self.label_root = label_root
         self.image_root = image_root
         self.path_replace = path_replace
         self.box_form = box_form
-        self.files = file_utils.get_files_list(label_root, basename=True)
+        self.files = cvtools.get_files_list(label_root, basename=True)
         self.lines = []
-        self.cls_map = file_utils.read_key_value('rscup2019/cat_id_map.txt')
+        self.cls_map = cvtools.read_key_value(cls_map)
         self.coco_dataset = {
             "info": {
                 "description": "This is stable 1.0 version of the 2019 rscup race.",
                 "url": "http://rscup.bjxintong.com.cn/#/theme/2",
                 "version": "1.0", "year": 2019,
                 "contributor": "rscup",
-                "date_created": get_now_time_str()
+                "date_created": cvtools.get_now_time_str()
             },
             "categories": [],
             "images": [], "annotations": []
         }
         self.imageID = 1
         self.annID = 1
-        self.run_timer = Timer()
+        self.run_timer = cvtools.Timer()
 
-    def convert(self):
+    def convert(self, use_crop=False):
         for key, value in self.cls_map.items():
             self.coco_dataset['categories'].append({
                 'id': int(value),
@@ -50,8 +54,9 @@ class Rscup2COCO(object):
             with open(os.path.join(self.label_root, file), 'r') as f:
                 lines = f.readlines()
             # !only do once for one file label
-            # image_name = file.replace('.txt', '.png')
-            image_name = file.split('_')[0] + '.png'
+            image_name = file.replace('.txt', '.png')
+            if use_crop:
+                image_name = file.split('_')[0] + '.png'
             image_file = os.path.join(self.image_root, image_name)
             try:
                 # self.run_timer.tic()
@@ -71,14 +76,19 @@ class Rscup2COCO(object):
             # add image information to dataset
             for key, value in self.path_replace.items():
                 image_name = image_name.replace(key, value)
-            crop = list(map(int, os.path.basename(file).split('.')[0].split('_')[2:]))
-            self.coco_dataset["images"].append({
+            img_info = {
                 'file_name': image_name,    # relative path
                 'id': self.imageID,
                 'width': width,
                 'height': height,
-                'crop': crop
-            })
+            }
+            if use_crop:
+                crop = list(map(int, os.path.basename(file).split('.')[0].split('_')[2:]))
+                img_info['width'] = crop[2] - crop[0]
+                img_info['height'] = crop[3] - crop[1]
+                img_info['crop'] = crop
+            self.coco_dataset["images"].append(img_info)
+
             ignore = 0
             if height * width > 100000000:
                 ignore = 1
@@ -95,19 +105,10 @@ class Rscup2COCO(object):
                     box = cv2.boundingRect(a_hull)
                     area = box[2] * box[3]
                 elif self.box_form == 'xywha':
-                    # self.run_timer.tic()
                     xywha = cv2.minAreaRect(a_hull)
                     area = xywha[1][0] * xywha[1][1]
                     box = list(xywha[0]) + list(xywha[1]) + [xywha[2]]
-                    # x1y1x2y2x3y3x4y4 = cv2.boxPoints(xywha)
-                    # self.run_timer.toc(average=False)
                 elif self.box_form == 'x1y1x2y2x3y3x4y4':
-                    # points order：left_up, left_down, right_down, right_up
-                    # polygon = Polygon(a).convex_hull
-                    # area = polygon.area
-                    # polygon = np.array(polygon.exterior.coords[:]).reshape(1, -1).tolist()[0][:8]
-                    # # points order：left_up, right_up, right_down, left_down
-                    # polygon[2:4], polygon[6:8] = polygon[6:8], polygon[2:4]
                     area = cv2.contourArea(a_hull)
                     box = list(a_hull.reshape(-1).astype(np.float))
                 else:
@@ -129,22 +130,19 @@ class Rscup2COCO(object):
                 })
                 self.annID += 1
             self.imageID += 1
-        # print('opencv: {}'.format(self.run_timer.total_time))
 
     def save_json(self, to_file='cocolike.json'):
         # save json format results to disk
-        dirname = os.path.dirname(to_file)
-        if dirname != '' and not os.path.exists(dirname):
-            os.makedirs(os.path.dirname(dirname))
+        cvtools.utils.makedirs(to_file)
         with open(to_file, 'w') as f:
             json.dump(self.coco_dataset, f)  # using indent=4 show more friendly
         print('!save {} finished'.format(to_file))
 
 
 if __name__ == '__main__':
-    label_root = 'F:/data/rssrai2019_object_detection/crop/val/labelTxt+crop/'
-    image_root = 'F:/data/rssrai2019_object_detection/val/images/'
+    label_root = '../label_analysis/rscup/crop/train/labelTxt+crop/'
+    image_root = 'D:/data/rssrai2019_object_detection/train/images/'
     path_replace = {'\\': '/'}
     rscup_to_coco = Rscup2COCO(label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
-    rscup_to_coco.convert()
-    rscup_to_coco.save_json('rscup2019/rscup2019_x1y1wh_polygen_crop.json')
+    rscup_to_coco.convert(use_crop=True)
+    rscup_to_coco.save_json('rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json')
