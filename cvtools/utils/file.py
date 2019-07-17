@@ -66,14 +66,12 @@ def read_files_to_list(files, root=''):
     return images_list
 
 
-# 递归文件夹下所有文件夹，得到文件列表(默认含路径)
-def _get_files_list(root_dir, basename=False):
+# 递归文件夹下所有文件夹，得到文件列表(含路径)
+def _get_files_list(root_dir):
     """get all files under the given path.
 
     Args:
         root_dir(str): must use absolute path to get files.
-        basename(bool): if is True, file will not include path,
-            else includes path.
 
     Returns:
         list: all files under the given path.
@@ -82,23 +80,22 @@ def _get_files_list(root_dir, basename=False):
         return [root_dir]
     files_list = []
     for lists in os.listdir(root_dir):  # recursive
-        if basename:
-            files_list += _get_files_list(lists)
-        else:
-            files_list += _get_files_list(os.path.join(root_dir, lists))
+        files_list += _get_files_list(os.path.join(root_dir, lists))
     return files_list
 
 
 # 递归路径输出特定类型文件列表
 def get_files_list(root, file_type=None, basename=False):
     """file_type is a str or list."""
-    files_list = _get_files_list(root, basename)
+    files_list = _get_files_list(root)
     if file_type is not None:
         if isinstance(file_type, str):
             file_type = [file_type]
-        return [file for type in file_type for file in files_list if type in file]
-    else:
-        return files_list
+        files_list = [file for type in file_type for file in files_list if type in file]
+    if basename:
+        root += '/' if root[-1] != '/' else ''
+        files_list = [file.replace('\\', '/').replace(root, '') for file in files_list]
+    return files_list
 
 
 # 递归路径输出图片列表

@@ -4,6 +4,6 @@
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
 
-from arcsoft.attribute_combination import head_reserved
-from arcsoft.attribute_combination import face_reserved
-from arcsoft.attribute_combination import rect_reserved
+from .attribute_combination import (head_reserved, face_reserved, rect_reserved)
+
+__all__ = ['head_reserved', 'face_reserved', 'rect_reserved']

@@ -7,7 +7,7 @@
 import json
 import os
 from tqdm import tqdm
-import cv2
+import cv2.cv2 as cv
 from PIL import Image
 import numpy as np
 
@@ -18,7 +18,7 @@ class Rscup2COCO(object):
     def __init__(self,
                  label_root,
                  image_root,
-                 cls_map='rscup/cls_id_map.txt',
+                 cls_map='rscup/cat_id_map.txt',
                  path_replace=None,
                  box_form='x1y1wh'):
         self.label_root = label_root
@@ -99,17 +99,17 @@ class Rscup2COCO(object):
                     continue
                 polygon = list(map(float, [item.strip() for item in line[:8]]))
                 a = np.array(polygon).reshape(4, 2)  # prepare for Polygon class input
-                a_hull = cv2.convexHull(a.astype(np.float32), clockwise=False)  # 顺时针输出凸包
+                a_hull = cv.convexHull(a.astype(np.float32), clockwise=False)  # 顺时针输出凸包
 
                 if self.box_form == 'x1y1wh':
-                    box = cv2.boundingRect(a_hull)
+                    box = cv.boundingRect(a_hull)
                     area = box[2] * box[3]
                 elif self.box_form == 'xywha':
-                    xywha = cv2.minAreaRect(a_hull)
+                    xywha = cv.minAreaRect(a_hull)
                     area = xywha[1][0] * xywha[1][1]
                     box = list(xywha[0]) + list(xywha[1]) + [xywha[2]]
                 elif self.box_form == 'x1y1x2y2x3y3x4y4':
-                    area = cv2.contourArea(a_hull)
+                    area = cv.contourArea(a_hull)
                     box = list(a_hull.reshape(-1).astype(np.float))
                 else:
                     raise TypeError("not support {} box format!".format(self.box_form))
@@ -140,9 +140,9 @@ class Rscup2COCO(object):
 
 
 if __name__ == '__main__':
-    label_root = '../label_analysis/rscup/crop/train/labelTxt+crop/'
-    image_root = 'D:/data/rssrai2019_object_detection/train/images/'
+    label_root = 'F:/data/rssrai2019_object_detection/train/labelTxt/'
+    image_root = 'F:/data/rssrai2019_object_detection/train/images/'
     path_replace = {'\\': '/'}
     rscup_to_coco = Rscup2COCO(label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
-    rscup_to_coco.convert(use_crop=True)
-    rscup_to_coco.save_json('rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json')
+    rscup_to_coco.convert(use_crop=False)
+    rscup_to_coco.save_json('rscup/train_rscup_x1y1wh_polygen.json')

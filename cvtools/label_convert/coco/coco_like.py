@@ -17,5 +17,5 @@ class COCOLike(object):
 
 if __name__ == '__main__':
     # Mainly check if the file_name in self.COCO.imgs and cats in self.COCO are correct
-    cocolike_datasets = COCOLike('../rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json')
+    cocolike_datasets = COCOLike('../arcsoft/20181208_head_labeling_1.json')
     pass

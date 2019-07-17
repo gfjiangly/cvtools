@@ -14,9 +14,6 @@ import cvtools
 from cvtools.label_analysis.crop_in_order import CropInOder
 
 
-_DEBUG = False
-
-
 class COCOAnalysis(object):
     """coco-like datasets analysis"""
     def __init__(self, img_prefix, ann_file):
@@ -25,30 +22,10 @@ class COCOAnalysis(object):
         self.coco_dataset = cvtools.load_json(ann_file)
         self.COCO = cvtools.COCO(ann_file)
 
-    def split_dataset(self, to_file='data.json', val_size=0.1):
-        imgs_train, imgs_val = cvtools.split_dict(self.COCO.imgs, val_size)
-        print('images: {} train, {} test.'.format(len(imgs_train), len(imgs_val)))
-        name, suffix = osp.splitext(to_file)
-        dataset = copy.deepcopy(self.coco_dataset)
-        # deal train data
-        dataset['images'] = list(imgs_train.values())   # bad design
-        anns = []
-        for key in imgs_train.keys():
-            anns += self.COCO.imgToAnns[key]
-        dataset['annotations'] = anns
-        cvtools.save_json(dataset, to_file=name+'_train'+suffix)
-        # deal test data
-        dataset['images'] = list(imgs_val.values())
-        anns = []
-        for key in imgs_val.keys():
-            anns += self.COCO.imgToAnns[key]
-        dataset['annotations'] = anns
-        cvtools.save_json(dataset, to_file=name+'_val'+suffix)
-
     def cluster_analysis(self, save_root, cluster_names=('bbox', )):
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
-        if _DEBUG:
+        if cvtools._DEBUG:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:10]
         else:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
@@ -109,7 +86,7 @@ class COCOAnalysis(object):
             if vis_cats is not None and cat_name not in vis_cats:
                 continue
             print('Visualize %s' % cat_name)
-            if _DEBUG:
+            if cvtools._DEBUG:
                 roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:10]
             else:
                 roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
@@ -144,7 +121,7 @@ class COCOAnalysis(object):
     def vis_boxes(self, save_root, vis='bbox', box_format='x1y1wh'):
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
-        if _DEBUG:
+        if cvtools._DEBUG:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:10]
         else:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
@@ -154,8 +131,7 @@ class COCOAnalysis(object):
             print('Visualize image %d of %d: %s' % (i, len(roidb), entry['file_name']))
             image_name = entry['file_name']
             image_file = osp.join(self.img_prefix, image_name)
-            img = cv2.imdecode(np.fromfile(image_file, dtype=np.uint8), cv2.IMREAD_COLOR)   # support chinese
-            # img = cv2.imread(image_file)  # not support chinese
+            img = cvtools.imread(image_file)
             image_name = osp.splitext(image_name)[0]
             if 'crop' in entry:
                 img = img[entry['crop'][1]:entry['crop'][3], entry['crop'][0]:entry['crop'][2]]
@@ -183,7 +159,7 @@ class COCOAnalysis(object):
         crop = CropInOder(width_size=1920, height_size=1080, overlap=0.1)
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
-        if _DEBUG:
+        if cvtools._DEBUG:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:10]
         else:
             roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
@@ -239,15 +215,21 @@ class COCOAnalysis(object):
 
 
 if __name__ == '__main__':
-    img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
-    ann_file = '../label_convert/rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json'
-    coco_analysis = COCOAnalysis(img_prefix, ann_file)
+    # img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
+    # ann_file = '../label_convert/rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json'
+    # coco_analysis = COCOAnalysis(img_prefix, ann_file)
     # coco_analysis.crop_in_order('rscup/crop/train', box_format='x1y1wh')
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
     # coco_analysis.vis_boxes('rscup/vis_rscup_crop/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
-    coco_analysis.vis_boxes('rscup/vis_rscup_crop_box/', vis='bbox', box_format='x1y1wh')
+    # coco_analysis.vis_boxes('rscup/vis_rscup_crop_box/', vis='bbox', box_format='x1y1wh')
     # coco_analysis.split_dataset(to_file='Arcsoft/gender_elevator/gender_elevator.json', val_size=1./3.)
     # coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
     # coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))
     # coco_analysis.cluster_boxes_cat('rscup/bbox_distribution/', cluster_names=('area', ))
+
+    img_prefix = 'F:/data/detection/20181208_head_labeling'
+    ann_file = '../label_convert/arcsoft/20181208_head_labeling.json'
+    coco_analysis = COCOAnalysis(img_prefix, ann_file)
+    coco_analysis.vis_boxes('arcsoft/vis_box/', vis='bbox', box_format='x1y1wh')
+

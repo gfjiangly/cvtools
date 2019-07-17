@@ -4,41 +4,41 @@
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
 import os
+import os.path as osp
 import json
 from tqdm import tqdm
 from PIL import Image
 
-from cvtools.utils import *
-from .arcsoft.attribute_combination import *
+import cvtools
 
 
 class Arcsoft2COCO(object):
     """convert arcsoft format label to standard coco format."""
-    def __init__(self, path, path_replace=None, img_suffix='.jpg'):
+    def __init__(self, path, cls_map='arcsoft/cat_id_map.txt', path_replace=None, img_suffix='.jpg'):
         self.path = path
         self.path_replace = path_replace
         self.img_suffix = img_suffix
-        self.img_list = get_files_list(self.path, file_type=img_suffix)
-        self.txt_list = get_files_list(self.path, file_type='.txt')
+        self.txt_list = cvtools.get_files_list(self.path, file_type='.txt', basename=True)
         # you could comment this sentence if you don't want check integrity of images and labels.
+        # self.img_list = cvtools.get_files_list(self.path, file_type=img_suffix)
         # assert len(self.img_list) == len(self.txt_list)
-        self.cls_map = read_key_value('arcsoft/cat_id_map.txt')
+        self.cls_map = cvtools.read_key_value(cls_map)
         self.coco_dataset = {
             "info": {
                 "description": "This is unstable 0.0.0 version of the 2019 Projects Data.",
                 "url": "http://www.arcsoft.com",
                 "version": "1.0", "year": 2019,
                 "contributor": "arcsoft",
-                "date_created": get_now_time_str()
+                "date_created": cvtools.get_now_time_str()
             },
             "categories": [],  # Not added yet
             "images": [], "annotations": []
         }
         self.imageID = 1
         self.annID = 1
-        self.run_timer = Timer()
+        self.run_timer = cvtools.Timer()
 
-    def convert(self, label_processor=rect_reserved):
+    def convert(self, label_processor=cvtools.rect_reserved):
         # the latter content covers the previous content, if the id is repeated.
         id_cats = {value: key for key, value in self.cls_map.items()}
         for key, value in id_cats.items():
@@ -47,8 +47,10 @@ class Arcsoft2COCO(object):
                 'name': value,
                 'supercategory': value
             })
-        for txt_file in tqdm(self.txt_list):
-            img_file = txt_file.replace('.txt', self.img_suffix)
+        for txt_name in tqdm(self.txt_list):
+            img_name = txt_name.replace('.txt', self.img_suffix)
+            txt_file = osp.join(self.path, txt_name)
+            img_file = osp.join(self.path, img_name)
             # read the image to get width and height
             try:
                 # "PIL: Open an image file, without loading the raster data"
@@ -66,14 +68,14 @@ class Arcsoft2COCO(object):
                 for key, value in self.path_replace.items():
                     img_file = img_file.replace(key, value)
             self.coco_dataset["images"].append({
-                'file_name': img_file,
+                'file_name': img_name,   # use relative path
                 'id': self.imageID,
                 'width': width,
                 'height': height
             })
 
             # read txt label
-            labels = read_arcsoft_txt_format(txt_file)
+            labels = cvtools.read_arcsoft_txt_format(txt_file)
             if len(labels) == 0:
                 continue
             for label in labels:
@@ -96,17 +98,18 @@ class Arcsoft2COCO(object):
 
     def save_json(self, to_file='cocolike.json'):
         # save json format results to disk
-        dirname = os.path.dirname(to_file)
-        if dirname != '' and not os.path.exists(dirname):
-            os.makedirs(os.path.dirname(dirname))
+        dirname = osp.dirname(to_file)
+        if dirname != '' and not osp.exists(dirname):
+            os.makedirs(osp.dirname(dirname))
         with open(to_file, 'w') as f:
             json.dump(self.coco_dataset, f)  # using indent=4 show more friendly
         print('!save {} finished'.format(to_file))
 
 
 if __name__ == '__main__':
-    path_replace = {'\\': '/', 'F:/data/detection/elevator/gender/': '/media/data1/jgf/elevator/'}
-    arcsoft_to_coco = Arcsoft2COCO('F:/data/detection/elevator/gender',
-                                   path_replace=path_replace, img_suffix='.jpg')
-    arcsoft_to_coco.convert(label_processor=gender_reserved)
-    arcsoft_to_coco.save_json('arcsoft/gender_elevator.json')
+    path_replace = {'\\': '/'}
+    arcsoft_to_coco = Arcsoft2COCO('F:/data/detection/20181208_head_labeling',
+                                   cls_map='arcsoft/head_id_map.txt',
+                                   path_replace=path_replace, img_suffix='.jpeg')
+    arcsoft_to_coco.convert(label_processor=cvtools.head_reserved)
+    arcsoft_to_coco.save_json('arcsoft/20181208_head_labeling.json')

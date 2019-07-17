@@ -12,10 +12,10 @@ from .file import (readlines, read_files_to_list, write_list_to_file, read_files
 from .image import (imread, imwrite, draw_boxes_texts, draw_class_distribution, draw_hist)
 from .boxes import (x1y1wh_to_x1y1x2y2, x1y1x2y2_to_x1y1wh, xywh_to_x1y1x2y2, x1y1x2y2_to_xywh,
                     x1y1wh_to_xywh, rotate_rect, rotate_rects, xywha_to_x1y1x2y2x3y3x4y4)
-from .cluster import (k_means_cluster)
 from .timer import (Timer, get_now_time_str)
 from .label import (read_arcsoft_txt_format, read_jiang_txt, read_yuncong_detect_file)
 from .iou import (box_iou, bbox_overlaps)
+from .cluster import k_means_cluster
 
 
 __all__ = ['readlines', 'read_files_to_list', 'write_list_to_file', 'read_files_to_list',
@@ -29,10 +29,10 @@ __all__ = ['readlines', 'read_files_to_list', 'write_list_to_file', 'read_files_
            'x1y1wh_to_x1y1x2y2', 'x1y1x2y2_to_x1y1wh', 'xywh_to_x1y1x2y2', 'x1y1x2y2_to_xywh',
            'x1y1wh_to_xywh', 'rotate_rect', 'rotate_rects', 'xywha_to_x1y1x2y2x3y3x4y4',
 
-           'k_means_cluster',
-
            'Timer', 'get_now_time_str',
 
            'read_arcsoft_txt_format', 'read_jiang_txt', 'read_yuncong_detect_file',
 
-           'box_iou', 'bbox_overlaps']
+           'box_iou', 'bbox_overlaps',
+
+           'k_means_cluster']

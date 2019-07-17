@@ -3,3 +3,4 @@ numpy>=1.11.1
 opencv-python
 Pillow
 tqdm
+scikit-learn>=0.21
