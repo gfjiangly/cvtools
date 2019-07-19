@@ -7,12 +7,12 @@ import json
 import numpy as np
 
 from .file import read_files_to_list
+from .file import readlines
 
 
 # 读取虹软不完全格式化数据进list，测试通过
 def read_arcsoft_txt_format(file):
-    with open(file, 'r') as f:
-        data = f.readlines()
+    data = readlines(file)  # support chinese
     data_list = []
     try:
         for line in data:
