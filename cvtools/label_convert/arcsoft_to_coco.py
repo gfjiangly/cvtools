@@ -84,9 +84,8 @@ class Arcsoft2COCO(object):
                     continue    # may be not happened
                 label['id'] = self.annID
                 label['image_id'] = self.imageID
+                label['segmentation'] = []
                 label['iscrowd'] = 0
-                if 'category' not in label.keys():
-                    label['category'] = 'head'
                 try:
                     label['category_id'] = int(self.cls_map[label['category']])  # 0 for backgroud
                 except KeyError:
@@ -108,8 +107,8 @@ class Arcsoft2COCO(object):
 
 if __name__ == '__main__':
     path_replace = {'\\': '/'}
-    arcsoft_to_coco = Arcsoft2COCO('F:/data/detection/20181208_head_labeling',
-                                   cls_map='arcsoft/head_id_map.txt',
-                                   path_replace=path_replace, img_suffix='.jpeg')
-    arcsoft_to_coco.convert(label_processor=cvtools.head_reserved)
-    arcsoft_to_coco.save_json('arcsoft/20181208_head_labeling.json')
+    arcsoft_to_coco = Arcsoft2COCO('F:/data/person',
+                                   cls_map='arcsoft/gender_id_map.txt',
+                                   path_replace=path_replace, img_suffix='.jpg')
+    arcsoft_to_coco.convert(label_processor=cvtools.gender_reserved)
+    arcsoft_to_coco.save_json('arcsoft/person_gender.json')

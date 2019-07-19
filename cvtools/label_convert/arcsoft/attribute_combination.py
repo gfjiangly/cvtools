@@ -7,73 +7,55 @@
 import cvtools
 
 
-def head_reserved(label):
-    if not isinstance(label, dict):
-        raise RuntimeError('only support dict type!')
-    head = {}
-    if 'Face_Type' in label.keys() and label['Face_Type'] == 'Head':
-        head['bbox'] = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['rect'].split(','))))
-        head['area'] = head['bbox'][3] * head['bbox'][2]
-        # head['area'] = (head['bbox'][3] - head['bbox'][1]) * (head['bbox'][2] - head['bbox'][0])
-    return head
-
-
-def face_reserved(label):
-    if not isinstance(label, dict):
-        raise RuntimeError('only support dict type!')
-    face = {}
-    if 'Face_Type' in label.keys() and label['Face_Type'] == 'Alive':
-        face['bbox'] = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['rect'].split(','))))
-        face['area'] = face['bbox'][3] * face['bbox'][2]
-        # face['area'] = (face['bbox'][3] - face['bbox'][1]) * (face['bbox'][2] - face['bbox'][0])
-    return face
-
-
 def rect_reserved(label):
     if not isinstance(label, dict):
         raise RuntimeError('only support dict type!')
-    rect = {}
+
+    ann = {}
     if 'rect' in label.keys():
         bbox = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['rect'].split(','))))
-        area = bbox[3] * bbox[2]
     elif 'faceRect' in label.keys():
         bbox = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['faceRect'].split(','))))
-        area = bbox[3] * bbox[2]
     else:
         bbox = []
-        area = 0
-    rect['bbox'] = bbox
-    rect['area'] = area
 
-    if 'Action' in label.keys():
-        rect['category'] = label['Action']
-    elif 'nature' in label.keys():
-        rect['category'] = label['nature']
-    return rect
+    if len(bbox) > 0:
+        area = bbox[3] * bbox[2]
+    else:
+        area = 0
+
+    ann['bbox'] = bbox
+    ann['area'] = area
+
+    return ann
+
+
+def face_reserved(label, have_assert=False):
+    if have_assert:
+        assert ('Face_Type' in label.keys() and label['Face_Type'] == 'Alive')
+    ann = rect_reserved(label)
+    ann['category'] = 'face'
+    return ann
+
+
+def head_reserved(label, have_assert=False):
+    if have_assert:
+        assert ('Face_Type' in label.keys() and label['Face_Type'] == 'Head') or \
+               ('Action' in label.keys() and label['Action'] == 'Head')
+    ann = rect_reserved(label)
+    ann['category'] = 'head'
+    return ann
 
 
 def gender_reserved(label):
-    if not isinstance(label, dict):
-        raise RuntimeError('only support dict type!')
-    rect = {}
-    if 'rect' in label.keys():
-        bbox = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['rect'].split(','))))
-        area = bbox[3] * bbox[2]
-    elif 'faceRect' in label.keys():
-        bbox = cvtools.x1y1x2y2_to_x1y1wh(list(map(int, label['faceRect'].split(','))))
-        area = bbox[3] * bbox[2]
-    else:
-        bbox = []
-        area = 0
-    rect['bbox'] = bbox
-    rect['area'] = area
+    ann = rect_reserved(label)
 
     if 'gender' in label.keys():
-        rect['category'] = label['gender']
+        ann['category'] = label['gender']
     elif '上半身衣着性别' in label.keys():
-        rect['category'] = label['上半身衣着性别']
+        ann['category'] = label['上半身衣着性别']
     elif '下身衣着性别' in label.keys():
-        rect['category'] = label['下身衣着性别']
+        ann['category'] = label['下身衣着性别']
     # elif 'nature' in label.keys():
     #     rect['category'] = label['nature']
-    return rect
+    return ann

@@ -11,8 +11,7 @@ import cvtools
 
 class SplitDataset(object):
     """coco-like datasets analysis"""
-    def __init__(self, img_prefix, ann_file):
-        self.img_prefix = img_prefix
+    def __init__(self, ann_file):
         self.ann_file = ann_file
         self.coco_dataset = cvtools.load_json(ann_file)
         self.COCO = cvtools.COCO(ann_file)
@@ -42,7 +41,6 @@ class SplitDataset(object):
 
 
 if __name__ == '__main__':
-    img_prefix = 'F:/data/detection/20181208_head_labeling'
-    ann_file = 'arcsoft/20181208_head_labeling.json'
-    split_data = SplitDataset(img_prefix, ann_file)
+    ann_file = 'arcsoft/elevator_gender.json'
+    split_data = SplitDataset(ann_file)
     split_data.split_dataset(to_file=ann_file, val_size=0.5)

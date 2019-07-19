@@ -5,7 +5,6 @@
 # @File    : utils.py
 # @Software: PyCharm
 import os
-import numpy as np
 import json
 import shutil
 from tqdm import tqdm
@@ -250,7 +249,10 @@ def files_name_replace(path, file_type=None, folder=False, list_replace=None):
             for key, value in list_replace.items():
                 if key in file:
                     new_file = file.replace(key, value)
-                    os.rename(file, new_file)   # change inplace
+                    try:
+                        os.rename(file, new_file)   # change inplace
+                    except Exception as e:
+                        print(e)
     if folder:
         folder_name_replace(path, list_replace)
 
@@ -346,6 +348,6 @@ if __name__ == "__main__":
         '视频': 'video',
         '质检完成': 'quality_inspection'
     }
-    files_name_replace('F:/data/detection', folder=True, list_replace=replace)
+    files_name_replace('/media/data/detection', folder=True, list_replace=replace)
 
     pass

@@ -5,8 +5,8 @@
 # software : PyCharm
 
 from .rscup_to_coco import Rscup2COCO
-from .arcsoft import (head_reserved, face_reserved, rect_reserved)
+from .arcsoft import (rect_reserved, face_reserved, head_reserved, gender_reserved)
 
 
 __all__ = ['Rscup2COCO',
-           'head_reserved', 'face_reserved', 'rect_reserved']
+           'rect_reserved', 'face_reserved', 'head_reserved', 'gender_reserved']
