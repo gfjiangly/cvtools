@@ -5,6 +5,7 @@
 # software: PyCharm
 
 import os
+import os.path as osp
 import sys
 import numpy as np
 import cv2.cv2 as cv
@@ -74,7 +75,9 @@ def imwrite(img, file_path, params=None, auto_mkdir=True):
         raise TypeError('"img" must be a numpy array!')
     if auto_mkdir:
         cvtools.makedirs(file_path)
-    return cv.imwrite(file_path, img, params)
+    # return cv.imwrite(file_path, img, params)
+    # support path included chinese
+    return cv.imencode(osp.splitext(file_path)[-1], img, params)[1].tofile(file_path)
 
 
 # 使用PIL lazy方式读图像，防止读大图像死机; 支持中文路径
