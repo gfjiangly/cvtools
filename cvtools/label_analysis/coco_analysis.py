@@ -167,7 +167,7 @@ class COCOAnalysis(object):
             # save in jpg format for saving storage
             cvtools.imwrite(img, osp.join(save_root, image_name + '.jpg'))
 
-    def crop_in_order(self, save_root, w=1920, h=1080, overlap=0.1):
+    def crop_in_order_with_label(self, save_root, w=1920, h=1080, overlap=0.1):
         assert 1920 >= w >= 800 and 1080 >= h >= 800 and 0.5 >= overlap >= 0.
         crop = CropInOder(width_size=w, height_size=h, overlap=overlap)
         image_ids = self.COCO.getImgIds()
@@ -226,6 +226,27 @@ class COCOAnalysis(object):
             # if len(crops) > 0:
             #     draw_img = cvtools.draw_boxes_texts(img, crops, line_width=3, box_format='x1y1x2y2')
             #     cvtools.imwrite(draw_img, osp.join(save_root, 'images', img_name_no_suffix+'.jpg'))
+
+    def crop_in_order_to_json(self, img_root, save):
+        from utils.file_utils import get_images_list
+        from collections import defaultdict
+        imgs = get_images_list(img_root)
+        crop = CropInOder(width_size=1920, height_size=1080, overlap=0.1)
+        self.test_dataset = defaultdict(list)
+        for image_file in tqdm(imgs):
+            print('crop {}'.format(image_file))
+            image_name = os.path.basename(image_file)
+            img = imread(image_file)  # support chinese
+            # img = cv2.imread(image_file)  # not support chinese
+            if img is None:
+                print('{} is None.'.format(image_file))
+                continue
+            crop_imgs, starts, _ = crop(img)
+            for crop_img, start in zip(crop_imgs, starts):
+                crop_rect = start[0], start[1], start[0]+crop_img.shape[1], start[1]+crop_img.shape[0]
+                self.test_dataset[image_name].append(crop_rect)
+        from utils.file_utils import save_json
+        save_json(self.test_dataset, save)
 
 
 if __name__ == '__main__':
