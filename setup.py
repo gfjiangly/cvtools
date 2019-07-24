@@ -9,7 +9,8 @@ from setuptools import find_packages, setup
 
 
 install_requires = [
-    'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm'
+    'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
+    'scikit-learn>=0.21.2'
 ]
 
 
@@ -21,7 +22,7 @@ def get_version():
 
 
 setup(
-    name='cvtools',
+    name='cvtoolss',
     version=get_version(),
     description='Computer Vision Foundation Utilities',
     keywords='computer vision',

@@ -86,6 +86,7 @@ def _get_files_list(root_dir):
 # 递归路径输出特定类型文件列表
 def get_files_list(root, file_type=None, basename=False):
     """file_type is a str or list."""
+    root = root.replace('\\', '/')
     files_list = _get_files_list(root)
     if file_type is not None:
         if isinstance(file_type, str):

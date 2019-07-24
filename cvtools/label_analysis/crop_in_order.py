@@ -12,8 +12,8 @@ import cvtools
 class CropInOder(object):
 
     def __init__(self, width_size=1920, height_size=1080, overlap=0.):
-        self.width_size = width_size
-        self.height_size = height_size
+        self.width_size = int(width_size)
+        self.height_size = int(height_size)
         self.overlap = overlap
 
     def __call__(self, img, boxes=None, labels=None):
@@ -39,6 +39,7 @@ class CropInOder(object):
                     if sy < 0:
                         sy = 0
                     y_stop = True
+                # sy, ey, sx, ex = int(sy), int(ey), int(sx), int(ex)
                 crop_imgs.append(img[sy:ey, sx:ex])
                 starts.append((sx, sy))
                 if x_stop:
