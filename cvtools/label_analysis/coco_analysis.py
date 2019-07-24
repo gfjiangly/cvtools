@@ -22,6 +22,18 @@ class COCOAnalysis(object):
         self.coco_dataset = cvtools.load_json(ann_file)
         self.COCO = cvtools.COCO(ann_file)
 
+    def stats_size(self):
+        # TODO: 统计不同大小的实例比例
+        #  for small objects: area < 32^2
+        #  for medium objects: 32^2 < area < 96^2
+        #  for large objects: area > 96^2
+        #  see http://cocodataset.org/#detection-eval and https://arxiv.org/pdf/1405.0312.pdf
+        pass
+
+    def stats_num(self):
+        # TODO: 统计每张图实例均数（可按类别）
+        pass
+
     def cluster_analysis(self, save_root, cluster_names=('bbox', )):
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
@@ -228,8 +240,8 @@ if __name__ == '__main__':
     # coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))
     # coco_analysis.cluster_boxes_cat('rscup/bbox_distribution/', cluster_names=('area', ))
 
-    img_prefix = 'F:/data/detection/20181208_head_labeling'
-    ann_file = '../label_convert/arcsoft/20181208_head_labeling.json'
+    img_prefix = 'F:/data/person'
+    ann_file = '../label_convert/arcsoft/annotations/head/person.json'
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    coco_analysis.vis_boxes('arcsoft/vis_box/', vis='bbox', box_format='x1y1wh')
+    coco_analysis.vis_boxes('arcsoft/vis_person/', vis='bbox', box_format='x1y1wh')
 
