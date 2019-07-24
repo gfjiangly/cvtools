@@ -167,8 +167,9 @@ class COCOAnalysis(object):
             # save in jpg format for saving storage
             cvtools.imwrite(img, osp.join(save_root, image_name + '.jpg'))
 
-    def crop_in_order(self, save_root, box_format='x1y1wh'):
-        crop = CropInOder(width_size=1920, height_size=1080, overlap=0.1)
+    def crop_in_order(self, save_root, w=1920, h=1080, overlap=0.1):
+        assert 1920 >= w >= 800 and 1080 >= h >= 800 and 0.5 >= overlap >= 0.
+        crop = CropInOder(width_size=w, height_size=h, overlap=overlap)
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
         if cvtools._DEBUG:
@@ -181,7 +182,8 @@ class COCOAnalysis(object):
         cvtools.makedirs(save_root+'/labelTxt+crop')
 
         for entry in tqdm(roidb):
-            print('crop {}'.format(entry['file_name']))
+            if cvtools._DEBUG:
+                print('crop {}'.format(entry['file_name']))
             image_name = entry['file_name']
             image_file = osp.join(self.img_prefix, image_name)
             img_name_no_suffix, img_suffix = osp.splitext(image_name)
@@ -227,21 +229,21 @@ class COCOAnalysis(object):
 
 
 if __name__ == '__main__':
-    # img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
-    # ann_file = '../label_convert/rscup/train_crop1920x1080_rscup_x1y1wh_polygen.json'
-    # coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    # coco_analysis.crop_in_order('rscup/crop/train', box_format='x1y1wh')
+    img_prefix = 'D:/data/rssrai2019_object_detection/val/images'
+    ann_file = '../label_convert/rscup/val_rscup_x1y1wh_polygen.json'
+    coco_analysis = COCOAnalysis(img_prefix, ann_file)
+    coco_analysis.crop_in_order('rscup/crop800x800/val', w=800., h=800.)
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
-    # coco_analysis.vis_boxes('rscup/vis_rscup_crop/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
-    # coco_analysis.vis_boxes('rscup/vis_rscup_crop_box/', vis='bbox', box_format='x1y1wh')
+    # coco_analysis.vis_boxes('rscup/vis_rscup_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
+    # coco_analysis.vis_boxes('rscup/vis_rscup_crop800x800/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
     # coco_analysis.split_dataset(to_file='Arcsoft/gender_elevator/gender_elevator.json', val_size=1./3.)
     # coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
     # coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))
     # coco_analysis.cluster_boxes_cat('rscup/bbox_distribution/', cluster_names=('area', ))
 
-    img_prefix = 'F:/data/person'
-    ann_file = '../label_convert/arcsoft/annotations/head/person.json'
-    coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    coco_analysis.vis_boxes('arcsoft/vis_person/', vis='bbox', box_format='x1y1wh')
+    # img_prefix = 'F:/data/detection/20181208_head_labeling'
+    # ann_file = '../label_convert/arcsoft/20181208_head_labeling.json'
+    # coco_analysis = COCOAnalysis(img_prefix, ann_file)
+    # coco_analysis.vis_boxes('arcsoft/vis_box/', vis='bbox', box_format='x1y1wh')
 
