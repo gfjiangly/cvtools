@@ -11,5 +11,5 @@ from .label_analysis import *
 from .version import __version__
 
 
-_DEBUG = True
+_DEBUG = False
 

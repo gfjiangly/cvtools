@@ -125,5 +125,3 @@ dmypy.json
 # custom
 .idea/
 *.json
-*.jpg
-*.png

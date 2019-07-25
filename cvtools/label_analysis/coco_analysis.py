@@ -16,11 +16,12 @@ from cvtools.label_analysis.crop_in_order import CropInOder
 
 class COCOAnalysis(object):
     """coco-like datasets analysis"""
-    def __init__(self, img_prefix, ann_file):
+    def __init__(self, img_prefix, ann_file=None):
         self.img_prefix = img_prefix
-        self.ann_file = ann_file
-        self.coco_dataset = cvtools.load_json(ann_file)
-        self.COCO = cvtools.COCO(ann_file)
+        if ann_file is not None:
+            self.ann_file = ann_file
+            self.coco_dataset = cvtools.load_json(ann_file)
+            self.COCO = cvtools.COCO(ann_file)
 
     def stats_size(self):
         # TODO: 统计不同大小的实例比例
@@ -167,7 +168,7 @@ class COCOAnalysis(object):
             # save in jpg format for saving storage
             cvtools.imwrite(img, osp.join(save_root, image_name + '.jpg'))
 
-    def crop_in_order_with_label(self, save_root, w=1920, h=1080, overlap=0.1):
+    def crop_in_order_with_label(self, save_root, w=1920, h=1080, overlap=0.):
         assert 1920 >= w >= 800 and 1080 >= h >= 800 and 0.5 >= overlap >= 0.
         crop = CropInOder(width_size=w, height_size=h, overlap=overlap)
         image_ids = self.COCO.getImgIds()
@@ -227,17 +228,17 @@ class COCOAnalysis(object):
             #     draw_img = cvtools.draw_boxes_texts(img, crops, line_width=3, box_format='x1y1x2y2')
             #     cvtools.imwrite(draw_img, osp.join(save_root, 'images', img_name_no_suffix+'.jpg'))
 
-    def crop_in_order_to_json(self, img_root, save):
-        from utils.file_utils import get_images_list
+    def crop_in_order_for_test(self, save, w=1920, h=1080, overlap=0.):
+        assert 1920 >= w >= 800 and 1080 >= h >= 800 and 0.5 >= overlap >= 0.
         from collections import defaultdict
-        imgs = get_images_list(img_root)
-        crop = CropInOder(width_size=1920, height_size=1080, overlap=0.1)
+        imgs = cvtools.get_images_list(self.img_prefix)
+        crop = CropInOder(width_size=w, height_size=h, overlap=overlap)
         self.test_dataset = defaultdict(list)
         for image_file in tqdm(imgs):
-            print('crop {}'.format(image_file))
-            image_name = os.path.basename(image_file)
-            img = imread(image_file)  # support chinese
-            # img = cv2.imread(image_file)  # not support chinese
+            if cvtools._DEBUG:
+                print('crop {}'.format(image_file))
+            image_name = osp.basename(image_file)
+            img = cvtools.imread(image_file)  # support chinese
             if img is None:
                 print('{} is None.'.format(image_file))
                 continue
@@ -245,15 +246,16 @@ class COCOAnalysis(object):
             for crop_img, start in zip(crop_imgs, starts):
                 crop_rect = start[0], start[1], start[0]+crop_img.shape[1], start[1]+crop_img.shape[0]
                 self.test_dataset[image_name].append(crop_rect)
-        from utils.file_utils import save_json
-        save_json(self.test_dataset, save)
+        cvtools.save_json(self.test_dataset, save)
 
 
 if __name__ == '__main__':
-    img_prefix = 'D:/data/rssrai2019_object_detection/val/images'
+    img_prefix = 'D:/data/rssrai2019_object_detection/test/images'
     ann_file = '../label_convert/rscup/val_rscup_x1y1wh_polygen.json'
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    coco_analysis.crop_in_order('rscup/crop800x800/val', w=800., h=800.)
+    # coco_analysis.crop_in_order_with_label('rscup/crop800x800/val', w=800., h=800., overlap=0.1)
+    save = 'rscup/test_crop800x800_rscup_x1y1wh_polygen.json'
+    coco_analysis.crop_in_order_for_test(save, w=800., h=800., overlap=0.1)
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
     # coco_analysis.vis_boxes('rscup/vis_rscup_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
