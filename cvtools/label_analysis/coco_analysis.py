@@ -64,18 +64,20 @@ class COCOAnalysis(object):
             cluster_value_centers = cvtools.k_means_cluster(cluster_value, n_clusters=3)
             np.savetxt(osp.join(save_root, cluster_name+'.txt'), cluster_value_centers)
 
-    def cluster_boxes_cat(self, save_root, cluster_names=('bbox', )):
+    def cluster_boxes_cat(self, save_root, name_clusters=('bbox', ), n_clusters=(3,)):
+        assert len(name_clusters) == len(n_clusters)
         cluster_dict = defaultdict(lambda: defaultdict(list))
         for key, ann in self.COCO.anns.items():
-            if 'area' in cluster_names:
+            if 'area' in name_clusters:
                 cat_name = self.COCO.cats[ann['category_id']]['name']
                 cluster_dict['area'][cat_name].append(ann['area'])
         cvtools.makedirs(save_root)
-        for cluster_name, cluster_values in cluster_dict.items():
+        for i, cluster_name, cluster_values in enumerate(cluster_dict.items()):
             cluster_results = defaultdict(lambda: defaultdict(list))
             for cat, cluster_value in cluster_values.items():
-                if len(cluster_value) > 3:
-                    centers = cvtools.k_means_cluster(np.array(cluster_value).reshape(-1, 1), n_clusters=3)
+                if len(cluster_value) >= n_clusters[i]:
+                    centers = cvtools.k_means_cluster(np.array(cluster_value).reshape(-1, 1),
+                                                      n_clusters=n_clusters[i])
                     cluster_results[cluster_name][cat].append(list(centers.reshape(-1)))
             cvtools.save_json(cluster_results, osp.join(save_root, '{}_by_cat.json'.format(cluster_name)))
 
@@ -255,7 +257,7 @@ if __name__ == '__main__':
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
     # coco_analysis.crop_in_order_with_label('rscup/crop800x800/val', w=800., h=800., overlap=0.1)
     save = 'rscup/test_crop800x800_rscup_x1y1wh_polygen.json'
-    coco_analysis.crop_in_order_for_test(save, w=800., h=800., overlap=0.1)
+    coco_analysis.crop_in_order_for_test(save, w=800, h=800, overlap=0.1)
     # coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
     #                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
     # coco_analysis.vis_boxes('rscup/vis_rscup_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
