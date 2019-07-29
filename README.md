@@ -35,7 +35,7 @@ pip install .  # (add "-e" if you want to develop or modify the codes)
 
 example
 -------
-convert rscup compitition dataset to coco dataset format.
+convert rscup competition dataset to coco dataset format.
 ```python
 import cvtools
 
