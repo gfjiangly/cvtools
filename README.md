@@ -17,7 +17,8 @@ It provides the following functionalities.
 - Useful utilities (iou, timer, ...)
 
 
-# Installation
+Installation
+------------
 Try and start with
 ```bash
 pip install cvtoolss
@@ -32,7 +33,8 @@ pip install .  # (add "-e" if you want to develop or modify the codes)
 ```
 
 
-# example
+example
+-------
 convert rscup compitition dataset to coco dataset format.
 ```python
 import cvtools
