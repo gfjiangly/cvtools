@@ -8,7 +8,7 @@ pip install cvtoolss
 
 # example
 convert rscup compitition dataset to coco dataset format.
-```bash
+```python
 import cvtools
 
 
@@ -31,7 +31,7 @@ rscup_to_coco.save_json(save)
 ```
 
 coco-like dataset analysis
-```bash
+```python
 import cvtools
 
 
