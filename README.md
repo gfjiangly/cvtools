@@ -1,10 +1,21 @@
 # cvtools
 Computer Vision Tool Codes
 
-# install
+
+# Installation
+Try and start with
 ```bash
 pip install cvtoolss
 ```
+Note: There are two s at the end.
+
+or install from source
+```bash
+git clone https://github.com/gfjiangly/cvtools.git
+cd cvtools
+pip install .  # (add "-e" if you want to develop or modify the codes)
+```
+
 
 # example
 convert rscup compitition dataset to coco dataset format.
