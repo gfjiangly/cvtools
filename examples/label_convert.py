@@ -10,8 +10,15 @@ import cvtools
 label_root = 'F:/data/rssrai2019_object_detection/train/labelTxt/'
 # imgage folder
 image_root = 'F:/data/rssrai2019_object_detection/train/images/'
-# what you want to repalece in path string. if not, you can ignore this parameter.
+# what you want to repalece in path string.
+# if not, you can ignore this parameter.
 path_replace = {'\\': '/'}
-rscup_to_coco = cvtools.Rscup2COCO(label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
+rscup_to_coco = cvtools.Rscup2COCO(label_root,
+                                   image_root,
+                                   path_replace=path_replace,
+                                   box_form='x1y1wh')
+
 rscup_to_coco.convert()
-rscup_to_coco.save_json('rscup/train_rscup_x1y1wh_polygen.json')
+
+save = 'rscup/train_rscup_x1y1wh_polygen.json'
+rscup_to_coco.save_json(save)

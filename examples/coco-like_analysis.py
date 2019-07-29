@@ -12,13 +12,21 @@ img_prefix = 'F:/data/rssrai2019_object_detection/train/images'
 ann_file = '../label_convert/rscup/train_rscup_x1y1wh_polygen.json'
 coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
 
-coco_analysis.vis_boxes('rscup/vis_rscup_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
+save = 'rscup/vis_rscup_whole/'
+coco_analysis.vis_boxes(save,
+                        vis='segmentation',
+                        box_format='x1y1x2y2x3y3x4y4')
 
-coco_analysis.vis_boxes_by_cat('rscup/vis_rscup/', vis_cats=('helipad', ),
-                                vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
+save = 'rscup/vis_rscup/'
+coco_analysis.vis_boxes_by_cat(save,
+                               vis_cats=('helipad', ),
+                               vis='segmentation',
+                               box_format='x1y1x2y2x3y3x4y4')
 
-coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
+save = 'rscup/class_distribution/class_distribution.txt'
+coco_analysis.stats_class_distribution(save)
 
-coco_analysis.cluster_analysis('rscup/bbox_distribution/', cluster_names=('area', ))
+save = 'rscup/bbox_distribution/'
+coco_analysis.cluster_analysis(save, cluster_names=('area', ))
 
 # and so on...
