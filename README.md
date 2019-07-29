@@ -70,21 +70,15 @@ ann_file = '../label_convert/rscup/train_rscup_x1y1wh_polygen.json'
 coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
 
 save = 'rscup/vis_rscup_whole/'
-coco_analysis.vis_boxes(save, 
-                        vis='segmentation', 
-                        box_format='x1y1x2y2x3y3x4y4')
-
-save = 'rscup/vis_rscup/'
-coco_analysis.vis_boxes_by_cat(save, 
-                               vis_cats=('helipad', ),
-                               vis='segmentation', 
-                               box_format='x1y1x2y2x3y3x4y4')
+coco_analysis.vis_instances(save, 
+                            vis='segmentation', 
+                            box_format='x1y1x2y2x3y3x4y4')
 
 save = 'rscup/class_distribution/class_distribution.txt'
 coco_analysis.stats_class_distribution(save)
 
 save = 'rscup/bbox_distribution/'
-coco_analysis.cluster_analysis(save, cluster_names=('area', ))
+coco_analysis.cluster_analysis(save, name_clusters=('area', ))
 
 # and so on...
 ```

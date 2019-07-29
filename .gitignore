@@ -124,4 +124,5 @@ dmypy.json
 
 # custom
 .idea/
+cvtools/label_analysis/rscup/
 *.json

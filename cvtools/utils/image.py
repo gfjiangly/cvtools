@@ -211,7 +211,7 @@ def draw_class_distribution(y, save_name='class_distribution.png'):
 
 def draw_hist(data, bins=10,
               x_label="区间", y_label="频数/频率", title="频数/频率分布直方图",
-              save_name='hist.png'):
+              save_name='hist.png', density=True):
     """
     绘制直方图
     data: 必选参数，绘图数据
@@ -224,7 +224,7 @@ def draw_hist(data, bins=10,
     # facecolor:长条形的颜色
     # edgecolor:长条形边框的颜色
     # alpha:透明度
-    n, bins, patches = plt.hist(data, bins=bins, density=True, facecolor="blue", edgecolor='None')
+    n, bins, patches = plt.hist(data, bins=bins, density=density, facecolor="blue", edgecolor='None')
     # 显示横轴标签
     plt.xlabel(x_label)
     # 显示纵轴标签
