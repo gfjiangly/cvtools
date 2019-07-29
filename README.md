@@ -1,5 +1,20 @@
-# cvtools
-Computer Vision Tool Codes
+cvtools
+=======
+Computer Vision Tool Library
+
+Introduction
+------------
+
+cvtools is a helpful python library for computer vision.
+
+It provides the following functionalities.
+
+- Universal IO APIs
+- Dataset Conversion(voc to coco, bdd to coco, ...)
+- Dataset Analysis(visualization, cluster analysis, ...)
+- Data Augmentation(random mirror, random sample crop, ...)
+- Image processing(crop, resize, ...)
+- Useful utilities (iou, timer, ...)
 
 
 # Installation
