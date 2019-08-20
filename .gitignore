@@ -126,3 +126,4 @@ dmypy.json
 .idea/
 cvtools/label_analysis/rscup/
 *.json
+cvtools/data_augs/dota/*

@@ -16,6 +16,7 @@ from .timer import (Timer, get_now_time_str)
 from .label import (read_arcsoft_txt_format, read_jiang_txt, read_yuncong_detect_file)
 from .iou import (box_iou, bbox_overlaps)
 from .cluster import k_means_cluster, DBSCAN_cluster
+from .misc import is_str, concat_list, is_list_of
 
 
 __all__ = ['readlines', 'read_files_to_list', 'write_list_to_file', 'read_files_to_list',
@@ -35,4 +36,6 @@ __all__ = ['readlines', 'read_files_to_list', 'write_list_to_file', 'read_files_
 
            'box_iou', 'bbox_overlaps',
 
-           'k_means_cluster', 'DBSCAN_cluster']
+           'k_means_cluster', 'DBSCAN_cluster',
+
+           'is_str', 'concat_list', 'is_list_of']

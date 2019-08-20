@@ -5,11 +5,13 @@
 # @File    : setup.py
 # @Software: PyCharm
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Extension
+import numpy as np
 
 
 install_requires = [
     'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
+    'pyyaml', 'terminaltables',
     'scikit-learn>=0.21.2'
 ]
 
@@ -20,6 +22,15 @@ def get_version():
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']
 
+
+ext_modules = [
+    Extension(
+        'cvtools/pycocotools._mask',
+        sources=['cvtools/pycocotools/maskApi.c', 'cvtools/pycocotools/_mask.pyx'],
+        include_dirs=[np.get_include(), './'],
+        extra_compile_args=[]  # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
+    )
+]
 
 setup(
     name='cvtoolss',
@@ -46,6 +57,7 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     install_requires=install_requires,
+    ext_modules= ext_modules,
     zip_safe=False)
 
 """如果应用在开发过程中会频繁变更，每次安装还需要先将原来的版本卸掉，很麻烦。
