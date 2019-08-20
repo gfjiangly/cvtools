@@ -13,12 +13,12 @@ image_root = 'F:/data/rssrai2019_object_detection/train/images/'
 # what you want to repalece in path string.
 # if not, you can ignore this parameter.
 path_replace = {'\\': '/'}
-rscup_to_coco = cvtools.Rscup2COCO(label_root,
-                                   image_root,
-                                   path_replace=path_replace,
-                                   box_form='x1y1wh')
+dota_to_coco = cvtools.DOTA2COCO(label_root,
+                                 image_root,
+                                 path_replace=path_replace,
+                                 box_form='x1y1wh')
 
-rscup_to_coco.convert()
+dota_to_coco.convert()
 
 save = 'rscup/train_rscup_x1y1wh_polygen.json'
-rscup_to_coco.save_json(save)
+dota_to_coco.save_json(save)

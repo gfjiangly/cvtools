@@ -2,7 +2,7 @@
 # @Time    : 2019/6/19 19:35
 # @Author  : gfjiang
 # @Site    : 
-# @File    : rscup_to_coco.py
+# @File    : dota_to_coco.py
 # @Software: PyCharm
 import json
 import os
@@ -14,11 +14,11 @@ import numpy as np
 import cvtools
 
 
-class Rscup2COCO(object):
+class DOTA2COCO(object):
     def __init__(self,
                  label_root,
                  image_root,
-                 cls_map='rscup/cat_id_map.txt',
+                 cls_map='dota/cat_id_map.txt',
                  path_replace=None,
                  box_form='x1y1wh'):
         self.label_root = label_root
@@ -30,10 +30,10 @@ class Rscup2COCO(object):
         self.cls_map = cvtools.read_key_value(cls_map)
         self.coco_dataset = {
             "info": {
-                "description": "This is stable 1.0 version of the 2019 rscup race.",
-                "url": "http://rscup.bjxintong.com.cn/#/theme/2",
-                "version": "1.0", "year": 2019,
-                "contributor": "rscup",
+                "description": "This is stable 1.0 version of the DOTA.",
+                "url": "http://captain.whu.edu.cn/DOTAweb/index.html",
+                "version": "1.0", "year": 2018,
+                "contributor": "DOTA",
                 "date_created": cvtools.get_now_time_str()
             },
             "categories": [],
@@ -141,9 +141,9 @@ class Rscup2COCO(object):
 
 if __name__ == '__main__':
     label_root = 'D:/data/rssrai2019_object_detection/val/labelTxt/'
-    crop_label_root = '../label_analysis/rscup/crop800x800/val/labelTxt+crop'
+    crop_label_root = '../label_analysis/dota/crop800x800/val/labelTxt+crop'
     image_root = 'D:/data/rssrai2019_object_detection/val/images/'
     path_replace = {'\\': '/'}
-    rscup_to_coco = Rscup2COCO(crop_label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
-    rscup_to_coco.convert(use_crop=True)
-    rscup_to_coco.save_json('rscup/val_crop800x800_rscup_x1y1wh_polygen.json')
+    dota_to_coco = DOTA2COCO(crop_label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
+    dota_to_coco.convert(use_crop=True)
+    dota_to_coco.save_json('rscup/val_crop800x800_dota_x1y1wh_polygen.json')

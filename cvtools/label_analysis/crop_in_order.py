@@ -16,7 +16,7 @@ class CropInOder(object):
         self.height_size = int(height_size)
         self.overlap = overlap
 
-    def __call__(self, img, boxes=None, labels=None):
+    def __call__(self, img, boxes=None, labels=None, iof_th=0.8):
         h, w, c = img.shape
         crop_imgs = []
         starts = []
@@ -60,7 +60,8 @@ class CropInOder(object):
                 crop_x1, crop_y1 = starts[i]
                 img_box = cvtools.x1y1wh_to_x1y1x2y2(np.array([[crop_x1, crop_y1, crop_w, crop_h]]))
                 iof = cvtools.bbox_overlaps(gt_boxes.reshape(-1, 4), img_box.reshape(-1, 4), mode='iof').reshape(-1)
-                ids = iof == 1.
+                ids = iof > iof_th
+                temp = (iof > 0.) & (iof < 1.)
                 # boxes_in = boxes[ids]
                 labels_in = labels[ids]
                 if len(labels_in) > 0:

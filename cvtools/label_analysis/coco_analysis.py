@@ -78,8 +78,8 @@ class COCOAnalysis(object):
             cvtools.draw_hist(value_arr, bins=1000, x_label=cluster_name, y_label="Quantity",
                               title=cluster_name, density=False,
                               save_name=osp.join(save_root, cluster_name+'.png'))
-            cluster_value = np.array(cluster_value).reshape(-1, 1)
-            cluster_value_centers = cvtools.k_means_cluster(cluster_value, n_clusters=n_clusters[i])
+            cluster_value = np.array(value_arr).reshape(-1, 1)
+            cluster_value_centers = cvtools.DBSCAN_cluster(cluster_value, metric='manhattan')
             np.savetxt(osp.join(save_root, cluster_name+'.txt'),
                        np.around(cluster_value_centers, decimals=0))
         print('cluster analysis finished!')
@@ -242,16 +242,27 @@ class COCOAnalysis(object):
                 crop_objs = self.COCO.loadAnns(new_ann_ids[crop_i])
                 if len(crop_objs) == 0:
                     continue
-                for crop_obj in crop_objs:
-                    polygen = np.array(crop_obj['segmentation'][0]).reshape(-1, 2)
-                    polygen = polygen - np.array(starts[crop_i]).reshape(-1, 2)
-                    line = list(map(str, polygen.reshape(-1)))
-                    cat = self.COCO.cats[crop_obj['category_id']]['name']
-                    diffcult = str(crop_obj['difficult'])
-                    line.append(cat)
-                    line.append(diffcult)
-                    txt_content += ' '.join(line) + '\n'
-                cvtools.strwrite(txt_content, osp.join(save_root, 'labelTxt+crop', txt_name))
+                crop_segs = np.array([crop_obj['segmentation'][0] for crop_obj in crop_objs])
+                # filter_segs = []
+                temp1 = np.any(crop_segs < 0., axis=1)
+                filter_segs = crop_segs[np.any(crop_segs > w, axis=1)]
+                # filter_segs.append(crop_segs[np.any(crop_segs > w, axis=1)])
+                if len(filter_segs) > 0:
+                    pass
+                # for crop_obj in crop_objs:
+                #     polygen = np.array(crop_obj['segmentation'][0]).reshape(-1, 2)
+                #     polygen = polygen - np.array(starts[crop_i]).reshape(-1, 2)
+                #     temp1 = np.any(polygen < 0., axis=1)
+                #     temp = polygen[temp1]
+                #     if len(temp) > 0:
+                #         pass
+                #     line = list(map(str, polygen.reshape(-1)))
+                #     cat = self.COCO.cats[crop_obj['category_id']]['name']
+                #     diffcult = str(crop_obj['difficult'])
+                #     line.append(cat)
+                #     line.append(diffcult)
+                #     txt_content += ' '.join(line) + '\n'
+                # cvtools.strwrite(txt_content, osp.join(save_root, 'labelTxt+crop', txt_name))
             # if len(crops) > 0:
             #     draw_img = cvtools.draw_boxes_texts(img, crops, line_width=3, box_format='x1y1x2y2')
             #     cvtools.imwrite(draw_img, osp.join(save_root, 'images', img_name_no_suffix+'.jpg'))
@@ -279,22 +290,22 @@ class COCOAnalysis(object):
 
 if __name__ == '__main__':
     img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
-    ann_file = '../label_convert/rscup/train_rscup_x1y1wh_polygen.json'
+    ann_file = '../label_convert/dota/train_dota_x1y1wh_polygen.json'
     coco_analysis = COCOAnalysis(img_prefix, ann_file)
 
-    # coco_analysis.stats_num('rscup/num_per_img.json')
+    # coco_analysis.stats_num('dota/num_per_img.json')
 
-    # coco_analysis.crop_in_order_with_label('rscup/crop800x800/val', w=800., h=800., overlap=0.1)
+    coco_analysis.crop_in_order_with_label('dota/crop800x800/val', w=800., h=800., overlap=0.1)
 
-    # save = 'rscup/test_crop800x800_rscup_x1y1wh_polygen.json'
+    # save = 'dota/test_crop800x800_dota_x1y1wh_polygen.json'
     # coco_analysis.crop_in_order_for_test(save, w=800, h=800, overlap=0.1)
 
-    # coco_analysis.vis_instances('rscup/vis_rscup_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
+    # coco_analysis.vis_instances('dota/vis_dota_whole/', vis='segmentation', box_format='x1y1x2y2x3y3x4y4')
 
     # coco_analysis.split_dataset(to_file='Arcsoft/gender_elevator/gender_elevator.json', val_size=1./3.)
-    # coco_analysis.stats_class_distribution('rscup/class_distribution/class_distribution.txt')
+    # coco_analysis.stats_class_distribution('dota/class_distribution/class_distribution.txt')
 
-    coco_analysis.cluster_analysis('rscup/bbox_distribution/', name_clusters=('w-vs-h',), n_clusters=(5,))
+    # coco_analysis.cluster_analysis('dota/bbox_distribution/', name_clusters=('area',), n_clusters=(18,))
 
     # img_prefix = 'F:/data/detection/20181208_head_labeling'
     # ann_file = '../label_convert/arcsoft/20181208_head_labeling.json'

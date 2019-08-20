@@ -9,7 +9,7 @@ import cvtools
 # imgage folder
 img_prefix = 'F:/data/rssrai2019_object_detection/train/images'
 # position you save in dataset convertion.
-ann_file = '../label_convert/rscup/train_rscup_x1y1wh_polygen.json'
+ann_file = '../label_convert/rscup/train_dota_x1y1wh_polygen.json'
 coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
 
 save = 'rscup/vis_rscup_whole/'
