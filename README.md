@@ -40,22 +40,23 @@ convert rscup competition dataset to coco dataset format.
 import cvtools
 
 
+# convert dota dataset to coco dataset format
 # label folder
-label_root = 'F:/data/rssrai2019_object_detection/train/labelTxt/'
+label_root = 'F:/data/DOTA/train/labelTxt/'
 # imgage folder
-image_root = 'F:/data/rssrai2019_object_detection/train/images/'
-# what you want to repalece in path string. 
+image_root = 'F:/data/DOTA/train/images/'
+# what you want to repalece in path string.
 # if not, you can ignore this parameter.
 path_replace = {'\\': '/'}
-rscup_to_coco = cvtools.Rscup2COCO(label_root, 
-                                   image_root, 
-                                   path_replace=path_replace, 
-                                   box_form='x1y1wh')
+dota_to_coco = cvtools.DOTA2COCO(label_root,
+                                 image_root,
+                                 path_replace=path_replace,
+                                 box_form='x1y1wh')
 
-rscup_to_coco.convert()
+dota_to_coco.convert()
 
-save = 'rscup/train_rscup_x1y1wh_polygen.json'
-rscup_to_coco.save_json(save)
+save = 'dota/train_dota_x1y1wh_polygen.json'
+dota_to_coco.save_json(save)
 ```
 
 coco-like dataset analysis
@@ -64,20 +65,20 @@ import cvtools
 
 
 # imgage folder
-img_prefix = 'F:/data/rssrai2019_object_detection/train/images'
+img_prefix = 'F:/data/DOTA/train/images'
 # position you save in dataset convertion.
-ann_file = '../label_convert/rscup/train_rscup_x1y1wh_polygen.json'
+ann_file = '../label_convert/dota/train_dota_x1y1wh_polygen.json'
 coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
 
-save = 'rscup/vis_rscup_whole/'
+save = 'dota/vis_dota_whole/'
 coco_analysis.vis_instances(save, 
                             vis='segmentation', 
                             box_format='x1y1x2y2x3y3x4y4')
 
-save = 'rscup/class_distribution/class_distribution.txt'
+save = 'dota/class_distribution/class_distribution.txt'
 coco_analysis.stats_class_distribution(save)
 
-save = 'rscup/bbox_distribution/'
+save = 'dota/bbox_distribution/'
 coco_analysis.cluster_analysis(save, name_clusters=('area', ))
 
 # and so on...

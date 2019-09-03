@@ -5,7 +5,7 @@
 # @File    : dota_to_coco.py
 # @Software: PyCharm
 import json
-import os
+import os.path as osp
 from tqdm import tqdm
 import cv2.cv2 as cv
 from PIL import Image
@@ -25,7 +25,11 @@ class DOTA2COCO(object):
         self.image_root = image_root
         self.path_replace = path_replace
         self.box_form = box_form
-        self.files = cvtools.get_files_list(label_root, basename=True)
+        self.files = []
+        self.files += cvtools.get_files_list(
+            label_root, basename=True)
+        if cvtools._DEBUG:
+            self.files = self.files[:10]
         self.lines = []
         self.cls_map = cvtools.read_key_value(cls_map)
         self.coco_dataset = {
@@ -51,13 +55,13 @@ class DOTA2COCO(object):
                 'supercategory': key
             })
         for file in tqdm(self.files):
-            with open(os.path.join(self.label_root, file), 'r') as f:
+            with open(osp.join(self.label_root, file), 'r') as f:
                 lines = f.readlines()
             # !only do once for one file label
             image_name = file.replace('.txt', '.png')
             if use_crop:
                 image_name = file.split('_')[0] + '.png'
-            image_file = os.path.join(self.image_root, image_name)
+            image_file = osp.join(self.image_root, image_name)
             try:
                 # self.run_timer.tic()
                 "PIL: Open an image file, without loading the raster data"
@@ -83,7 +87,9 @@ class DOTA2COCO(object):
                 'height': height,
             }
             if use_crop:
-                crop = list(map(int, os.path.basename(file).split('.')[0].split('_')[2:]))
+                # get crop coor
+                crop_str = osp.splitext(osp.basename(file))[0].split('_')[2:]
+                crop = list(map(int, crop_str))
                 img_info['width'] = crop[2] - crop[0]
                 img_info['height'] = crop[3] - crop[1]
                 img_info['crop'] = crop
@@ -135,15 +141,16 @@ class DOTA2COCO(object):
         # save json format results to disk
         cvtools.utils.makedirs(to_file)
         with open(to_file, 'w') as f:
-            json.dump(self.coco_dataset, f)  # using indent=4 show more friendly
+            json.dump(self.coco_dataset, f)
         print('!save {} finished'.format(to_file))
 
 
 if __name__ == '__main__':
-    label_root = 'D:/data/rssrai2019_object_detection/val/labelTxt/'
-    crop_label_root = '../label_analysis/dota/crop800x800/val/labelTxt+crop'
-    image_root = 'D:/data/rssrai2019_object_detection/val/images/'
+    label_root = 'D:/data/DOTA/train/labelTxt/'
+    # crop_label_root = '../label_analysis/doto/train/labelTxt+crop'
+    image_root = 'D:/data/DOTA/train/images/'
     path_replace = {'\\': '/'}
-    dota_to_coco = DOTA2COCO(crop_label_root, image_root, path_replace=path_replace, box_form='x1y1wh')
-    dota_to_coco.convert(use_crop=True)
-    dota_to_coco.save_json('rscup/val_crop800x800_dota_x1y1wh_polygen.json')
+    dota_to_coco = DOTA2COCO(label_root, image_root,
+                             path_replace=path_replace, box_form='x1y1wh')
+    dota_to_coco.convert()
+    dota_to_coco.save_json('dota/train_dota_x1y1wh_polygen.json')

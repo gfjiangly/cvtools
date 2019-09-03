@@ -14,5 +14,5 @@ from .data_augs import *
 from .version import __version__
 
 
-_DEBUG = False
+_DEBUG = True
 
