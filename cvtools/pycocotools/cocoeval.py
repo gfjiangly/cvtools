@@ -425,7 +425,7 @@ class COCOeval:
         Compute and display summary metrics for evaluation results.
         Note this functin can *only* be applied on the default parameter setting
         '''
-        def _summarize( ap=1, iouThr=None, areaRng='all', maxDets=100 ):
+        def _summarize( ap=1, iouThr=None, areaRng='all', maxDets=100, cat=None):
             p = self.params
             iStr = ' {:<18} {} @[ IoU={:<9} | area={:>6s} | maxDets={:>3d} ] = {:0.3f}'
             titleStr = 'Average Precision' if ap == 1 else 'Average Recall'
@@ -452,6 +452,10 @@ class COCOeval:
                     t = np.where(iouThr == p.iouThrs)[0]
                     s = s[t]
                 s = s[:,:,aind,mind]
+            if cat is not None:
+                assert 0 <= cat < s.shape[2]
+                iStr = str(cat)+' '+iStr
+                s = s[:, :, cat]
             if len(s[s>-1])==0:
                 mean_s = -1
             else:
@@ -459,7 +463,11 @@ class COCOeval:
             print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             return mean_s
         def _summarizeDets():
-            stats = np.zeros((18,))
+            cats_num = len(self.params.catIds)
+            stats = np.zeros((18+cats_num,))
+            for i in range(cats_num):
+                stats[18+i] = _summarize(1, cat=i)
+            print('--------------------------------')
             stats[0] = _summarize(1)
             stats[1] = _summarize(1, iouThr=.5, maxDets=self.params.maxDets[2])
             stats[2] = _summarize(1, iouThr=.75, maxDets=self.params.maxDets[2])
@@ -477,7 +485,7 @@ class COCOeval:
             stats[14] = _summarize(1, iouThr=.8, maxDets=self.params.maxDets[2])
             stats[15] = _summarize(1, iouThr=.85, maxDets=self.params.maxDets[2])
             stats[16] = _summarize(1, iouThr=.9, maxDets=self.params.maxDets[2])
-            stats[16] = _summarize(1, iouThr=.95, maxDets=self.params.maxDets[2])
+            stats[17] = _summarize(1, iouThr=.95, maxDets=self.params.maxDets[2])
             return stats
         def _summarizeKps():
             stats = np.zeros((10,))

@@ -5,6 +5,7 @@
 # @File    : utils.py
 # @Software: PyCharm
 import os
+import os.path as osp
 import json
 import shutil
 from tqdm import tqdm
@@ -61,7 +62,7 @@ def read_files_to_list(files, root=''):
         files = [files]
     images_list = []
     for file in files:
-        images_list += read_file_to_list(os.path.join(root, file))
+        images_list += read_file_to_list(osp.join(root, file))
     return images_list
 
 
@@ -75,11 +76,11 @@ def _get_files_list(root_dir):
     Returns:
         list: all files under the given path.
     """
-    if not os.path.isdir(root_dir):
+    if not osp.isdir(root_dir):
         return [root_dir]
     files_list = []
     for lists in os.listdir(root_dir):  # recursive
-        files_list += _get_files_list(os.path.join(root_dir, lists))
+        files_list += _get_files_list(osp.join(root_dir, lists))
     return files_list
 
 
@@ -91,10 +92,14 @@ def get_files_list(root, file_type=None, basename=False):
     if file_type is not None:
         if isinstance(file_type, str):
             file_type = [file_type]
-        files_list = [file for type in file_type for file in files_list if type in file]
+        files_list = [file.replace('\\', '/') for type in file_type
+                      for file in files_list
+                      if type == osp.splitext(file)[1]]
     if basename:
+        # add '/' in the end of root
         root += '/' if root[-1] != '/' else ''
-        files_list = [file.replace('\\', '/').replace(root, '') for file in files_list]
+        files_list = [file.replace('\\', '/').replace(root, '')
+                      for file in files_list]
     return files_list
 
 
@@ -142,7 +147,7 @@ def split_dict(data_dict, test_size=0.1):
 # 批量将文件名中空格替换为下划线
 def replace_filename_space(src_root, dst_root):
     files = get_files_list(src_root)
-    if not os.path.exists(dst_root):
+    if not osp.exists(dst_root):
         os.mkdir(dst_root)
     for file in files:
         temp = file.split('/')[-1].replace(' ', '_')
@@ -170,12 +175,12 @@ def check_rept(file):
 def makedirs(path):
     if path is None or path == '':
         return False
-    if os.path.isfile(path):    # 是文件并且已存在
+    if osp.isfile(path):    # 是文件并且已存在
         return False
     try:
         if '.' in path:
-            path = os.path.dirname(path)
-        if not os.path.exists(path):
+            path = osp.dirname(path)
+        if not osp.exists(path):
             os.makedirs(path)
     except Exception as e:
         print(e, 'make dirs failed!')
@@ -184,17 +189,17 @@ def makedirs(path):
 
 
 def sample_label_from_images(images_src, labels_src, dst):
-    assert os.path.exists(images_src)
-    assert os.path.exists(labels_src)
+    assert osp.exists(images_src)
+    assert osp.exists(labels_src)
     images = _get_files_list(images_src)
-    if not os.path.exists(dst):
+    if not osp.exists(dst):
         os.makedirs(dst)
     for image in tqdm(images):
-        image = os.path.basename(image)
-        filename, extension = os.path.splitext(image)
+        image = osp.basename(image)
+        filename, extension = osp.splitext(image)
         if extension == '.jpg':
-            filename = os.path.join(labels_src, filename + '.json')
-            if os.path.exists(filename):
+            filename = osp.join(labels_src, filename + '.json')
+            if osp.exists(filename):
                 shutil.copy(filename, dst)
             else:
                 print('!!!Warning: %s not exists' % filename)
@@ -236,8 +241,8 @@ def folder_name_replace(path, list_replace):
                 if key not in dir:
                     continue
                 try:
-                    fold = os.path.join(root, dir)
-                    new_fold = os.path.join(root, dir.replace(key, value))
+                    fold = osp.join(root, dir)
+                    new_fold = osp.join(root, dir.replace(key, value))
                     os.rename(fold, new_fold)  # change inplace
                 except Exception as e:
                     print(e)
@@ -268,16 +273,17 @@ def load_json(file):
 # 以json格式保存数据到disk
 def save_json(data, to_file='data.json'):
     # save json format results to disk
-    dirname = os.path.dirname(to_file)
-    if dirname != '' and not os.path.exists(dirname):
-        os.makedirs(os.path.dirname(dirname))
+    makedirs(to_file)
+    # dirname = osp.dirname(to_file)
+    # if dirname != '' and not osp.exists(dirname):
+    #     os.makedirs(osp.dirname(dirname))
     with open(to_file, 'w') as f:
         json.dump(data, f)  # using indent=4 show more friendly
     print('!save {} finished'.format(to_file))
 
 
 def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
-    if not os.path.isfile(filename):
+    if not osp.isfile(filename):
         raise FileNotFoundError(msg_tmpl.format(filename))
 
 
@@ -292,12 +298,12 @@ if __name__ == "__main__":
     # txt_laber_list = get_files_list('F:/data/detection', file_type=('.txt', '.jpeg'))
 
     # # 测试通过，2019.3.7
-    # root = os.path.abspath('..')+'/datasets/'
+    # root = osp.abspath('..')+'/datasets/'
     # files = ['elevator_20180106.txt', 'elevator_20180115.txt', 'elevator_20181230.txt', 'elevator_20181231.txt']
     # data = read_files_to_list(root, files)
 
     # # 测试通过，2019.3.7
-    # root = os.path.abspath('..')+'/datasets/'
+    # root = osp.abspath('..')+'/datasets/'
     # files = ['elevator_20180106.txt', 'elevator_20181230.txt', 'elevator_20181231.txt']
     # files = ['elevator_20180601_convert.txt']
     # split_data(root, files)

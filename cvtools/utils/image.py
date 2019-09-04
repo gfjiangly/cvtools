@@ -155,7 +155,6 @@ def draw_boxes_texts(img, boxes, texts=None, colors=None, line_width=1, draw_sta
         elif box_format == 'x1y1wh':
             box[0:4] = cvtools.x1y1wh_to_x1y1x2y2(list(box[0:4]))
             cv.rectangle(img, tuple(box[0:2]), tuple(box[2:4]), box_color, thickness)
-            pass
         elif box_format == 'xywh':
             box[0:4] = cvtools.xywh_to_x1y1x2y2(list(box[0:4]))
             cv.rectangle(img, tuple(box[0:2]), tuple(box[2:4]), box_color, thickness)

@@ -6,7 +6,6 @@
 # @Software: PyCharm
 from .pycocotools import *
 from .utils import *
-from .utils.fileio import *
 from .utils.evaluation import *
 from .label_convert import *
 from .label_analysis import *
