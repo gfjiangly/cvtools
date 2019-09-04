@@ -76,6 +76,8 @@ def _get_files_list(root_dir):
     Returns:
         list: all files under the given path.
     """
+    # for Linux, isdir cannot recognize ~ home path
+    root_dir = osp.expanduser(root_dir)
     if not osp.isdir(root_dir):
         return [root_dir]
     files_list = []
@@ -87,19 +89,19 @@ def _get_files_list(root_dir):
 # 递归路径输出特定类型文件列表
 def get_files_list(root, file_type=None, basename=False):
     """file_type is a str or list."""
-    root = root.replace('\\', '/')
+    root = osp.abspath(root)
     files_list = _get_files_list(root)
     if file_type is not None:
         if isinstance(file_type, str):
             file_type = [file_type]
-        files_list = [file.replace('\\', '/') for type in file_type
+        files_list = [file for type in file_type
                       for file in files_list
                       if type == osp.splitext(file)[1]]
     if basename:
-        # add '/' in the end of root
-        root += '/' if root[-1] != '/' else ''
-        files_list = [file.replace('\\', '/').replace(root, '')
+        # 似乎不太符合最小惊讶原则
+        files_list = [file.replace(root+os.sep, '')
                       for file in files_list]
+        # files_list = [osp.basename(file) for file in files_list]
     return files_list
 
 
