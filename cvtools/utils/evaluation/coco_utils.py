@@ -1,9 +1,9 @@
 import numpy as np
+import mmcv
 
 from cvtools.pycocotools.coco import COCO
 from cvtools.pycocotools.cocoeval import COCOeval
 from .recall import eval_recalls
-import cvtools
 
 
 def coco_eval(result_files, result_types, coco, max_dets=(100, 300, 1000)):
@@ -43,9 +43,9 @@ def fast_eval_recall(results,
                      coco,
                      max_dets,
                      iou_thrs=np.arange(0.5, 0.96, 0.05)):
-    if cvtools.is_str(results):
+    if mmcv.is_str(results):
         assert results.endswith('.pkl')
-        results = cvtools.load(results)
+        results = mmcv.load(results)
     elif not isinstance(results, list):
         raise TypeError(
             'results must be a list of numpy arrays or a filename, not {}'.
@@ -160,18 +160,18 @@ def results2json(dataset, results, out_file):
         json_results = det2json(dataset, results)
         result_files['bbox'] = '{}.{}.json'.format(out_file, 'bbox')
         result_files['proposal'] = '{}.{}.json'.format(out_file, 'bbox')
-        # cvtools.dump(json_results, result_files['bbox'])
+        mmcv.dump(json_results, result_files['bbox'])
     elif isinstance(results[0], tuple):
         json_results = segm2json(dataset, results)
         result_files['bbox'] = '{}.{}.json'.format(out_file, 'bbox')
         result_files['proposal'] = '{}.{}.json'.format(out_file, 'bbox')
         result_files['segm'] = '{}.{}.json'.format(out_file, 'segm')
-        cvtools.dump(json_results[0], result_files['bbox'])
-        cvtools.dump(json_results[1], result_files['segm'])
+        mmcv.dump(json_results[0], result_files['bbox'])
+        mmcv.dump(json_results[1], result_files['segm'])
     elif isinstance(results[0], np.ndarray):
         json_results = proposal2json(dataset, results)
         result_files['proposal'] = '{}.{}.json'.format(out_file, 'proposal')
-        cvtools.dump(json_results, result_files['proposal'])
+        mmcv.dump(json_results, result_files['proposal'])
     else:
         raise TypeError('invalid type of results')
     return result_files
