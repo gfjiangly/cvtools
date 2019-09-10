@@ -7,6 +7,7 @@ import os.path as osp
 import copy
 
 import cvtools
+from cvtools.utils.misc import sort_dict
 
 
 class SplitDataset(object):
@@ -39,8 +40,40 @@ class SplitDataset(object):
         dataset['annotations'] = anns
         cvtools.save_json(dataset, to_file=osp.join(path, 'val_'+name))
 
+    def split_cats(self):
+        catToImgs = sort_dict(self.COCO.catToImgs)
+        self.catToDatasets = []
+        for cat, img_ids in catToImgs.items():
+            img_ids = set(img_ids)
+            categories = [cat_info for cat_info in
+                          self.coco_dataset['categories']
+                          if cat_info['id'] == cat]
+            images = [img_info for img_info in
+                      self.coco_dataset['images']
+                      if img_info['id'] in img_ids]
+            annotations = [ann_info for ann_info in
+                           self.coco_dataset['annotations']
+                           if ann_info['category_id'] == cat]
+            self.catToDatasets.append(
+                {'info': self.coco_dataset['info'],
+                 'categories': categories,
+                 'images': images,
+                 'annotations': annotations}
+            )
+
+    def save_cat_datasets(self, to_file):
+        for dataset in self.catToDatasets:
+            cvtools.save_json(
+                dataset,
+                to_file=to_file.format(
+                    dataset['categories'][0]['name'])
+            )
+
 
 if __name__ == '__main__':
-    ann_file = 'arcsoft/elevator_gender.json'
+    ann_file = 'dota/test_dota+crop800x800.json'
     split_data = SplitDataset(ann_file)
-    split_data.split_dataset(to_file=ann_file, val_size=0.5)
+    split_data.split_cats()
+    split_data.save_cat_datasets(
+        to_file='dota/test_dota_{}+crop800x800.json'
+    )
