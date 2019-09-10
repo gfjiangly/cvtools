@@ -124,6 +124,12 @@ dmypy.json
 
 # custom
 .idea/
-cvtools/label_analysis/rscup/
-*.json
 cvtools/data_augs/dota/*
+cvtools/label_analysis/rscup/
+cvtools/label_analysis/coco/
+cvtools/label_analysis/dota/
+cvtools/label_convert/rscup/
+cvtools/label_convert/dota/
+*.json
+*.pkl
+

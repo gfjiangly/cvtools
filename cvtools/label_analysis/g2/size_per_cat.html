@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>层叠柱状图</title>
+    <script src="https://a.alipayobjects.com/jquery/jquery/1.11.1/jquery.js"></script>
+    <script src="https://gw.alipayobjects.com/as/g/datavis/g2/2.3.13/index.js"></script>
+  </head>
+  <body>
+    <div id="c1"></div>
+    <script>
+      $.getJSON('./size_per_cat_data.json', function(data) {
+        var Stat = G2.Stat;
+        var Frame = G2.Frame;
+        var frame = new Frame(data);
+        frame = Frame.combinColumns(frame,["small","medium", "large"],'Box','Size','Category');
+        var chart = new G2.Chart({
+          id: 'c1',
+          forceFit: true,
+          height: 600,
+          plotCfg: {
+            //margin: [30, 80, 90, 40],
+            background: { 
+              stroke: '#ccc', // 边颜色
+              lineWidth: 1,   // 边框粗细
+            } // 绘图区域背景设置
+          }
+        });
+        chart.source(frame);
+        chart.legend({
+          position: 'left'
+        });
+        chart.axis('Category', {
+          title: null
+        });
+        chart.axis('Box', {
+          titleOffset: 75,
+          formatter: function(val) {
+            return val;
+          },
+          position: 'right'
+        });
+        chart.intervalStack().position('Category*Box').color('Size', ['#E74C3C', '#9B59B6', '#1ABC9C']).size(10);  // 层叠柱状图
+        chart.render();
+      });
+    </script>
+  </body>
+</html>

@@ -11,7 +11,7 @@ import numpy as np
 
 install_requires = [
     'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
-    'pyyaml', 'terminaltables',
+    'pyyaml', 'terminaltables', 'mmcv>=0.2.13',
     'scikit-learn>=0.21.2'
 ]
 
