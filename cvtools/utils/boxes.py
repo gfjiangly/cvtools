@@ -42,6 +42,29 @@ def x1y1x2y2_to_x1y1wh(xyxy):
         raise TypeError('Argument xyxy must be a list, tuple, or numpy array.')
 
 
+def x1y1wh_to_x1y1x2y2x3y3x4y4(xywh):
+    """Convert [x1 y1 w h] box format to [x1 y1 x2 y2 x3 y3 x4 y4] format.
+    supported type: list, type and np.ndarray
+    """
+    if isinstance(xywh, (list, tuple)):
+        # Single box given as a list of coordinates
+        assert len(xywh) == 4
+        x1, y1 = xywh[0], xywh[1]
+        x4 = x1 + np.maximum(0., xywh[2] - 1.)
+        y4 = y1 + np.maximum(0., xywh[3] - 1.)
+        return [x1, y1, x4, y1, x4, y4, x1, y4]
+    elif isinstance(xywh, np.ndarray):
+        # Multiple boxes given as a 2D ndarray
+        x1y1 = xywh[:, 0:2]
+        x4y4 = xywh[:, 0:2] + np.maximum(0, xywh[:, 2:4] - 1)
+        return np.hstack(
+            (x1y1, np.hstack((x4y4[..., 0], x1y1[..., 1])),
+             x4y4, np.hstack((x1y1[..., 0], x4y4[..., 1])))
+        )
+    else:
+        raise TypeError('Argument xywh must be a list, tuple, or numpy array.')
+
+
 def xywh_to_x1y1x2y2(xywh):
     """Convert [x y w h] box format to [x1 y1 x2 y2] format."""
     if isinstance(xywh, (list, tuple)):
