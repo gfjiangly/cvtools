@@ -35,7 +35,22 @@ pip install .  # (add "-e" if you want to develop or modify the codes)
 
 example
 -------
-convert rscup competition dataset to coco dataset format.
+convert voc-like dataset to coco-like dataset
+```python
+import cvtools
+
+
+mode = 'train'
+root = 'D:/data/VOCdevkit/VOC2007'
+# The cls parameter is a file containing categories,
+# one category string is one line
+voc_to_coco = cvtools.VOC2COCO(root, mode=mode,
+                               cls='voc/cls.txt')
+voc_to_coco.convert()
+voc_to_coco.save_json(to_file='voc/{}.json'.format(mode))
+
+```
+convert dota dataset to coco-like dataset.
 ```python
 import cvtools
 

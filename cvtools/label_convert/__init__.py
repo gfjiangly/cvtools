@@ -6,7 +6,9 @@
 
 from .dota_to_coco import DOTA2COCO
 from .arcsoft import (rect_reserved, face_reserved, head_reserved, gender_reserved)
+from .voc_to_coco import VOC2COCO
 
 
 __all__ = ['DOTA2COCO',
-           'rect_reserved', 'face_reserved', 'head_reserved', 'gender_reserved']
+           'rect_reserved', 'face_reserved', 'head_reserved', 'gender_reserved',
+           'VOC2COCO']
