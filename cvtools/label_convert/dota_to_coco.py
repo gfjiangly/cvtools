@@ -120,6 +120,11 @@ class DOTA2COCO(object):
                 else:
                     raise TypeError("not support {} box format!".format(self.box_form))
 
+                if not self.check_box(box, width, height):
+                    print('{}: box {} out of the image {}x{}'.format(
+                        image_name, box, width, height))
+                    continue
+
                 box = list(map(lambda x: round(x, 2), box))
                 cat = line[8].strip()
                 difficult = int(line[9].strip())
@@ -136,6 +141,11 @@ class DOTA2COCO(object):
                 })
                 self.annID += 1
             self.imageID += 1
+
+    def check_box(self, box, w, h):
+        if box[0] > w or box[1] > h:    # for P1872.png
+            return False
+        return True
 
     def save_json(self, to_file='cocolike.json'):
         # save json format results to disk
