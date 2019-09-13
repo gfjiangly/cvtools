@@ -21,10 +21,10 @@ class VOC2COCO(object):
 
         file = osp.join(root, 'ImageSets/Main/{}.txt'.format(mode))
         self.imgs = cvtools.read_files_to_list(file)
-        self.img_paths = [
-            'JPEGImages/{}.jpg'.format(img_name)    # relative path
-            for img_name in self.imgs
-        ]
+        # self.img_paths = [
+        #     'JPEGImages/{}.jpg'.format(img_name)    # relative path
+        #     for img_name in self.imgs
+        # ]
         self.xml_paths = [
             osp.join(root, 'Annotations/{}.xml'.format(img_name))
             for img_name in self.imgs]
@@ -56,12 +56,14 @@ class VOC2COCO(object):
         for index, xml_path in enumerate(self.xml_paths):
             print('parsing xml {} of {}: {}.xml'.format(
                 index, len(self.imgs), self.imgs[index]))
-            img_path = self.img_paths[index]
+            # img_path = self.img_paths[index]
             tree = ET.parse(xml_path)
             root = tree.getroot()
+            filename = root.find('filename').text
             size = root.find('size')
             w = int(size.find('width').text)
             h = int(size.find('height').text)
+            img_path = 'JPEGImages/{}'.format(filename)
 
             img_info = {
                 'file_name': img_path,  # relative path
@@ -111,7 +113,7 @@ class VOC2COCO(object):
 
 
 if __name__ == '__main__':
-    mode = 'train'
+    mode = 'test'
     root = 'D:/data/hat_detect/SHWD/VOC2028'
     cls_replace = {'person': 'head'}
     voc_to_coco = VOC2COCO(root, mode=mode,
