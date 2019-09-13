@@ -12,7 +12,7 @@ import numpy as np
 install_requires = [
     'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
     'pyyaml', 'terminaltables', 'mmcv>=0.2.13',
-    'scikit-learn>=0.21.2'
+    'scikit-learn>=0.21.2', 'shapely>=1.6.4'
 ]
 
 
@@ -25,7 +25,7 @@ def get_version():
 
 ext_modules = [
     Extension(
-        'cvtools/pycocotools._mask',
+        'cvtools.pycocotools._mask',
         sources=['cvtools/pycocotools/maskApi.c', 'cvtools/pycocotools/_mask.pyx'],
         include_dirs=[np.get_include(), './'],
         extra_compile_args=[]  # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
