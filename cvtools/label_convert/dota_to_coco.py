@@ -15,12 +15,25 @@ import cvtools
 
 
 class DOTA2COCO(object):
+
     def __init__(self,
                  label_root,
                  image_root,
                  cls_map='dota/cat_id_map.txt',
                  path_replace=None,
                  box_form='x1y1wh'):
+        """convert DOTA labels to coco-like format labels.
+
+        Args:
+            label_root (str): label file path,
+                for example, '/home/data/DOTA/train/labelTxt'
+            image_root (str): image path,
+                for example, '/home/data/DOTA/train/images'
+            cls_map (str): file for dictionary{class_name: id, ...}
+            path_replace (dict): replace same things in images path,
+                if not needed, you can just ignore it.
+            box_form (str): coco bbox format, default 'x1y1wh'.
+        """
         self.label_root = label_root
         self.image_root = image_root
         self.path_replace = path_replace
