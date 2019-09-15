@@ -123,18 +123,31 @@ def draw_rect_test_labels(src, dst, first=sys.maxsize):
                 im.save(dst+img_name)
 
 
-def draw_boxes_texts(img, boxes,
+def draw_boxes_texts(img,
+                     boxes,
                      texts=None,
                      colors=None,
                      line_width=1,
                      draw_start=True,
                      box_format='x1y1x2y2'):
-    """support box format: x1y1x2y2(default), x1y1wh, xywh,
-        xywha, polygen
+    """Draw bboxes on an image.
+
+    Args:
+        img (str or ndarray): The image to be displayed.
+        boxes (list or ndarray): A list of ndarray of shape (k, 4).
+        texts (list): A list of shape (k).
+        colors (list[tuple or Color]): A list of colors.
+        line_width (int): Thickness of lines.
+        draw_start (bool): Draw a dot at the first vertex of the box.
+        box_format (str): x1y1x2y2(default), x1y1wh, xywh, xywha, polygen
     """
+    assert box_format in ('x1y1x2y2', 'x1y1wh', 'xywh', 'xywha',
+                          'polygen'), 'not supported box format!'
+    img = imread(img)
     if len(boxes) == 0:
         return img
     boxes = copy.deepcopy(boxes)
+    # convert bbox type to int
     if not isinstance(boxes, np.ndarray):
         if box_format != 'polygen':
             boxes = np.array(boxes)
@@ -188,8 +201,6 @@ def draw_boxes_texts(img, boxes,
             # cv.line(img, tuple(box[2:4]), tuple(box[4:6]), box_color, thickness)
             # cv.line(img, tuple(box[4:6]), tuple(box[6:8]), box_color, thickness)
             # cv.line(img, tuple(box[6:]), tuple(box[:2]), box_color, thickness)
-        else:
-            raise RuntimeError('not supported box format!')
         if draw_start:
             cv.circle(img, tuple(box[:2]),
                       radius=5, color=text_color, thickness=-1)

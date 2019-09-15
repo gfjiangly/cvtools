@@ -295,6 +295,13 @@ def strwrite(data, to_file):
         f.write(data)
 
 
+def isfile_casesensitive(path):
+    if not os.path.isfile(path):
+        return False   # exit early
+    directory, filename = os.path.split(path)
+    return filename in os.listdir(directory)
+
+
 if __name__ == "__main__":
     # # 测试通过，2019.6.28
     # txt_laber_list = get_files_list('F:/data/detection', file_type=('.txt', '.jpeg'))
