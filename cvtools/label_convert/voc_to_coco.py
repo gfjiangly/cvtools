@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import json
 
 import cvtools
+from cvtools.evaluation.class_names import get_classes
 
 
 class VOC2COCO(object):
@@ -11,7 +12,7 @@ class VOC2COCO(object):
     Args:
         root (str): path include images, xml, file list
         mode (str): 'train', 'val', 'trainval', 'test'. used to find file list.
-        cls (str or list): class name list.
+        cls (str or list): class name in a file or a list.
         cls_replace (dict): a dictionary for replacing class name. if not needed,
             you can just ignore it.
         use_xml_name (bool): image filename source, if true, using filename
@@ -21,7 +22,7 @@ class VOC2COCO(object):
     def __init__(self,
                  root,
                  mode='train',
-                 cls='cat.txt',
+                 cls=get_classes('voc'),
                  cls_replace=None,
                  use_xml_name=True,
                  read_test=False):
@@ -62,7 +63,7 @@ class VOC2COCO(object):
         self.imageID = 1
         self.annID = 1
 
-    def convert(self):
+    def convert(self, filter_objs=None):
         for key, value in self.cls_map.items():
             cls = key
             if self.cls_replace and key in self.cls_replace.keys():
@@ -76,7 +77,11 @@ class VOC2COCO(object):
             print('parsing xml {} of {}: {}.xml'.format(
                 index, len(self.imgs), self.imgs[index]))
             img_path = self.img_paths[index]
-            tree = ET.parse(xml_path)
+            try:
+                tree = ET.parse(xml_path)
+            except FileNotFoundError:
+                print('file {} is not found!'.format(xml_path))
+                continue
             root = tree.getroot()
             if self.use_xml_name:
                 img_path = 'JPEGImages/{}'.format(
@@ -91,9 +96,11 @@ class VOC2COCO(object):
                     osp.join(self.root, img_path)))
             else:
                 if self.read_test:
-                    img = cvtools.imread(osp.join(self.root, img_path))
-                    print('test read image {} pass: {}'.format(
-                        img_path, img.shape))
+                    try:
+                        cvtools.imread(osp.join(self.root, img_path))
+                    except Exception as e:
+                        print(e, 'filter images {}'.format(img_path))
+                        continue
 
             img_info = {
                 'file_name': img_path,  # relative path
@@ -103,7 +110,10 @@ class VOC2COCO(object):
             }
             self.coco_dataset["images"].append(img_info)
 
-            for obj in root.findall('object'):
+            objects = root.findall('object')
+            if filter_objs:
+                objects = filter_objs(objects)
+            for obj in objects:
                 name = obj.find('name').text
                 difficult = int(obj.find('difficult').text)
                 bnd_box = obj.find('bndbox')
@@ -146,7 +156,7 @@ if __name__ == '__main__':
     mode = 'train'
     root = 'D:/data/hat_detect/hat_V1.0'
     voc_to_coco = VOC2COCO(root, mode=mode,
-                           cls=['head', 'hat'])
+                           cls=['head', 'hat'], read_test=True)
     voc_to_coco.convert()
     to_file = 'D:/data/hat_detect/hat_V1.0/' \
               'json/{}_hat_V1.json'.format(mode)
