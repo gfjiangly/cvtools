@@ -24,12 +24,10 @@ class VOC2COCO(object):
                  mode='train',
                  cls=get_classes('voc'),
                  cls_replace=None,
-                 use_xml_name=True,
                  read_test=False):
         self.root = root
         self.mode = mode
         self.cls_replace = cls_replace
-        self.use_xml_name = use_xml_name
         self.read_test = read_test
         if isinstance(cls, str):
             self.voc_classes = cvtools.read_files_to_list(cls)
@@ -40,10 +38,6 @@ class VOC2COCO(object):
 
         file = osp.join(root, 'ImageSets/Main/{}.txt'.format(mode))
         self.imgs = cvtools.read_files_to_list(file)
-        self.img_paths = [
-            'JPEGImages/{}.jpg'.format(img_name)  # relative path
-            for img_name in self.imgs
-        ]
         self.xml_paths = [
             osp.join(root, 'Annotations/{}.xml'.format(img_name))
             for img_name in self.imgs]
@@ -76,31 +70,20 @@ class VOC2COCO(object):
         for index, xml_path in enumerate(self.xml_paths):
             print('parsing xml {} of {}: {}.xml'.format(
                 index, len(self.imgs), self.imgs[index]))
-            img_path = self.img_paths[index]
             try:
                 tree = ET.parse(xml_path)
             except FileNotFoundError:
                 print('file {} is not found!'.format(xml_path))
                 continue
             root = tree.getroot()
-            if self.use_xml_name:
-                img_path = 'JPEGImages/{}'.format(
-                    root.find('filename').text)
+            img_path = 'JPEGImages/{}'.format(root.find('filename').text)
             size = root.find('size')
             w = int(size.find('width').text)
             h = int(size.find('height').text)
 
-            if not cvtools.isfile_casesensitive(
-                    osp.join(self.root, img_path)):
-                print("No images found in {}".format(
-                    osp.join(self.root, img_path)))
-            else:
-                if self.read_test:
-                    try:
-                        cvtools.imread(osp.join(self.root, img_path))
-                    except Exception as e:
-                        print(e, 'filter images {}'.format(img_path))
-                        continue
+            img_path = self.check_image(img_path)
+            if img_path is None:
+                continue
 
             img_info = {
                 'file_name': img_path,  # relative path
@@ -143,6 +126,27 @@ class VOC2COCO(object):
                 })
                 self.annID += 1
             self.imageID += 1
+
+    def check_image(self, img_path):
+        file = osp.join(self.root, img_path)
+        if not cvtools.isfile_casesensitive(file):
+            image_types = ['.jpg', '.png', '.jpeg']
+            for suffix in image_types:
+                img_path = osp.splitext(img_path)[0] + suffix
+                file = osp.join(self.root, img_path)
+                if cvtools.isfile_casesensitive(file):
+                    break
+            if not cvtools.isfile_casesensitive(file):
+                print("No images found in {}".format(osp.basename(img_path)))
+                return None
+        else:
+            if self.read_test:
+                try:
+                    cvtools.imread(osp.join(self.root, img_path))
+                except Exception as e:
+                    print(e, 'filter images {}'.format(img_path))
+                    return None
+        return img_path
 
     def save_json(self, to_file='cocolike.json'):
         # save json format results to disk
