@@ -4,7 +4,6 @@
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
 import os.path as osp
-import copy
 
 import cvtools
 from cvtools.utils.misc import sort_dict
@@ -17,28 +16,32 @@ class SplitDataset(object):
         self.coco_dataset = cvtools.load_json(ann_file)
         self.COCO = cvtools.COCO(ann_file)
 
-    def split_dataset(self, to_file='data.json', val_size=0.1):
+    def split_dataset(self, val_size=0.1, to_file=None):
         imgs_train, imgs_val = cvtools.split_dict(self.COCO.imgs, val_size)
         print('images: {} train, {} test.'.format(len(imgs_train), len(imgs_val)))
 
-        path, name = osp.split(to_file)
-        dataset = copy.deepcopy(self.coco_dataset)
-
         # deal train data
-        dataset['images'] = list(imgs_train.values())  # bad design
+        train = dict(info=self.coco_dataset['info'],
+                     categories=self.coco_dataset['categories'])
+        train['images'] = list(imgs_train.values())  # bad design
         anns = []
         for key in imgs_train.keys():
             anns += self.COCO.imgToAnns[key]
-        dataset['annotations'] = anns
-        cvtools.save_json(dataset, to_file=osp.join(path, 'train_'+name))
+            train['annotations'] = anns
 
         # deal test data
-        dataset['images'] = list(imgs_val.values())
+        val = dict(info=train['info'], categories=train['categories'])
+        val['images'] = list(imgs_val.values())
         anns = []
         for key in imgs_val.keys():
             anns += self.COCO.imgToAnns[key]
-        dataset['annotations'] = anns
-        cvtools.save_json(dataset, to_file=osp.join(path, 'val_'+name))
+            val['annotations'] = anns
+
+        if to_file:
+            path, name = osp.split(to_file)
+            cvtools.save_json(train, to_file=osp.join(path, 'train_'+name))
+            cvtools.save_json(val, to_file=osp.join(path, 'val_'+name))
+        return val, train
 
     def split_cats(self):
         catToImgs = sort_dict(self.COCO.catToImgs)
