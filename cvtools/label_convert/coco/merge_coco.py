@@ -4,19 +4,27 @@
 # @Site    : 
 # @File    : merge_coco.py
 # @Software: PyCharm
+import copy
+
 from cvtools.utils.file import load_json, save_json
 
 
 class MergeCOCO(object):
-    """merge multiple coco-like datasets into one file"""
+    """merge multiple coco-like datasets into one file
 
+    Args:
+        files (list): a list of str or COCO object
+    """
     def __init__(self, files):
         if not isinstance(files, (list, tuple)):
             raise TypeError('files must be a list, but got {}'.format(
                 type(files)))
         assert len(files) > 1, 'least 2 files must be provided!'
         self.files = files
-        self.merge_coco = load_json(self.files[0])
+        if isinstance(self.files[0], dict):
+            self.merge_coco = copy.deepcopy(self.files[0])
+        else:
+            self.merge_coco = load_json(self.files[0])
         self.img_ids = [img_info['id']
                         for img_info in self.merge_coco['images']]
         self.ann_ids = [img_info['id']
@@ -39,11 +47,15 @@ class MergeCOCO(object):
             self.ann_ids.append(anns[i]['id'])
         self.merge_coco['annotations'] += anns
 
-    def merge(self):
+    def merge(self, to_file=None):
         for dataset in self.files[1:]:
-            coco = load_json(dataset)
+            if not isinstance(dataset, dict):
+                dataset = load_json(dataset)
             self.update_img_ann_ids(
-                coco['images'], coco['annotations'])
+                dataset['images'], dataset['annotations'])
+        if to_file:
+            self.save(save=to_file)
+        return self.merge_coco
 
     def save(self, save='merge_coco.json'):
         save_json(self.merge_coco, save)
