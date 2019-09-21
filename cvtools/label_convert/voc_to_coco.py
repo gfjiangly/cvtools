@@ -17,6 +17,7 @@ class VOC2COCO(object):
             you can just ignore it.
         use_xml_name (bool): image filename source, if true, using filename
             in xml for the image, otherwise using file list name for the image.
+        read_test (bool): Test if the picture can be read normally.
     """
 
     def __init__(self,
@@ -24,10 +25,12 @@ class VOC2COCO(object):
                  mode='train',
                  cls=get_classes('voc'),
                  cls_replace=None,
+                 use_xml_name=True,
                  read_test=False):
         self.root = root
         self.mode = mode
         self.cls_replace = cls_replace
+        self.use_xml_name = use_xml_name
         self.read_test = read_test
         if isinstance(cls, str):
             self.voc_classes = cvtools.read_files_to_list(cls)
@@ -38,6 +41,10 @@ class VOC2COCO(object):
 
         file = osp.join(root, 'ImageSets/Main/{}.txt'.format(mode))
         self.imgs = cvtools.read_files_to_list(file)
+        self.img_paths = [
+            'JPEGImages/{}.jpg'.format(img_name)  # relative path
+            for img_name in self.imgs
+        ]
         self.xml_paths = [
             osp.join(root, 'Annotations/{}.xml'.format(img_name))
             for img_name in self.imgs]
@@ -49,7 +56,7 @@ class VOC2COCO(object):
                 "url": "http://host.robots.ox.ac.uk/pascal/VOC/",
                 "version": "1.0", "year": 2007,
                 "contributor": "VOC",
-                "date_created": cvtools.get_now_time_str()
+                "date_created": cvtools.get_time_str()
             },
             "categories": [],
             "images": [], "annotations": []
@@ -69,7 +76,7 @@ class VOC2COCO(object):
             })
         for index, xml_path in enumerate(self.xml_paths):
             print('parsing xml {} of {}: {}.xml'.format(
-                index, len(self.imgs), self.imgs[index]))
+                index+1, len(self.imgs), self.imgs[index]))
             try:
                 tree = ET.parse(xml_path)
             except FileNotFoundError:
@@ -77,12 +84,15 @@ class VOC2COCO(object):
                 continue
             root = tree.getroot()
             img_path = 'JPEGImages/{}'.format(root.find('filename').text)
+            if not self.use_xml_name:
+                img_path = self.img_paths[index]
             size = root.find('size')
             w = int(size.find('width').text)
             h = int(size.find('height').text)
 
             img_path = self.check_image(img_path)
             if img_path is None:
+                print('{} failed to pass inspection'.format(self.xml_paths))
                 continue
 
             img_info = {
@@ -91,11 +101,14 @@ class VOC2COCO(object):
                 'width': w,
                 'height': h,
             }
-            self.coco_dataset["images"].append(img_info)
-
             objects = root.findall('object')
             if filter_objs:
-                objects = filter_objs(objects)
+                objects = filter_objs(img_info, objects)
+            if len(objects) == 0:
+                print('Image {} has no object'.format(img_path))
+                continue
+            self.coco_dataset["images"].append(img_info)
+
             for obj in objects:
                 name = obj.find('name').text
                 difficult = int(obj.find('difficult').text)
@@ -130,7 +143,7 @@ class VOC2COCO(object):
     def check_image(self, img_path):
         file = osp.join(self.root, img_path)
         if not cvtools.isfile_casesensitive(file):
-            image_types = ['.jpg', '.png', '.jpeg']
+            image_types = ['.jpg', '.png', '.jpeg', '.JPG', '.PNG', '.JPEG']
             for suffix in image_types:
                 img_path = osp.splitext(img_path)[0] + suffix
                 file = osp.join(self.root, img_path)
@@ -142,9 +155,12 @@ class VOC2COCO(object):
         else:
             if self.read_test:
                 try:
-                    cvtools.imread(osp.join(self.root, img_path))
+                    img = cvtools.imread(osp.join(self.root, img_path))
                 except Exception as e:
                     print(e, 'filter images {}'.format(img_path))
+                    return None
+                if img is None:
+                    print('image {} is None'.format(img_path))
                     return None
         return img_path
 
@@ -158,10 +174,9 @@ class VOC2COCO(object):
 
 if __name__ == '__main__':
     mode = 'train'
-    root = 'D:/data/hat_detect/hat_V1.0'
+    root = 'D:/data/VOC2007'
     voc_to_coco = VOC2COCO(root, mode=mode,
-                           cls=['head', 'hat'], read_test=True)
+                           cls=['person', 'car'], read_test=True)
     voc_to_coco.convert()
-    to_file = 'D:/data/hat_detect/hat_V1.0/' \
-              'json/{}_hat_V1.json'.format(mode)
+    to_file = 'D:/data/VOC2007/json/{}.json'.format(mode)
     voc_to_coco.save_json(to_file=to_file)
