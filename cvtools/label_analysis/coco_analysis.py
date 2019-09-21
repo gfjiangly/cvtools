@@ -27,13 +27,13 @@ class COCOAnalysis(object):
                 for ann in self.coco_dataset['annotations']:
                     self.catToAnns[ann['category_id']].append(ann)
 
-    def stats_size_per_cat(self, to_file):
+    def stats_size_per_cat(self, to_file='size_per_cat_data.json'):
         self.size_analysis.stats_size_per_cat(to_file=to_file)
 
     def stats_objs_per_img(self, to_file='stats_num.json'):
         self.size_analysis.stats_objs_per_img(to_file=to_file)
 
-    def stats_objs_per_cat(self, to_file='cls_dist.txt'):
+    def stats_objs_per_cat(self, to_file='objs_per_cat_data.json'):
         self.size_analysis.stats_objs_per_cat(to_file=to_file)
 
     def cluster_analysis(self,
@@ -109,9 +109,19 @@ class COCOAnalysis(object):
 
     def vis_instances(self,
                       save_root,
-                      vis='bbox',
+                      vis='bbox',   # or segm
                       box_format='x1y1wh',
                       by_cat=False):
+        """Visualise bbox and polygon in annotation.
+
+        Args:
+            save_root (str): path for saving image.
+            vis (str): 'bbox' or 'segmentation'
+            box_format (str): 'x1y1wh' or 'polygon'
+            by_cat (bool): if true, visualization by class
+        """
+        assert vis in ('bbox', 'segmentation')
+        assert box_format in ('x1y1wh', 'polygon')
         if by_cat:
             self._vis_instances_by_cat(save_root, vis, box_format)
         image_ids = self.COCO.getImgIds()
@@ -127,7 +137,11 @@ class COCOAnalysis(object):
                   (i, len(roidb), entry['file_name']))
             image_name = entry['file_name']
             image_file = osp.join(self.img_prefix, image_name)
-            img = cvtools.imread(image_file)
+            try:
+                img = cvtools.imread(image_file)
+            except FileNotFoundError:
+                print('image {} is not found!'.format(image_file))
+                continue
             image_name = osp.splitext(image_name)[0]
             if 'crop' in entry:
                 img = img[entry['crop'][1]:entry['crop'][3],

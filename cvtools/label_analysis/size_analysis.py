@@ -87,7 +87,7 @@ class SizeAnalysis(object):
         print(imgToNum)
         cvtools.save_json(imgToNum, to_file)
 
-    def stats_objs_per_cat(self, to_file='objs_per_cat_data.txt'):
+    def stats_objs_per_cat(self, to_file='objs_per_cat_data.json'):
         cls_to_num = list()
         for cat_id in self.coco.catToImgs:
             item = dict()
