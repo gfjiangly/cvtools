@@ -57,16 +57,11 @@ import cvtools
 
 # convert dota dataset to coco dataset format
 # label folder
-label_root = 'F:/data/DOTA/train/labelTxt/'
+label_root = '/media/data/DOTA/train/labelTxt/'
 # imgage folder
-image_root = 'F:/data/DOTA/train/images/'
-# what you want to repalece in path string.
-# if not, you can ignore this parameter.
-path_replace = {'\\': '/'}
-dota_to_coco = cvtools.DOTA2COCO(label_root,
-                                 image_root,
-                                 path_replace=path_replace,
-                                 box_form='x1y1wh')
+image_root = '/media/data/DOTA/train/images/'
+
+dota_to_coco = cvtools.DOTA2COCO(label_root, image_root)
 
 dota_to_coco.convert()
 
@@ -80,7 +75,7 @@ import cvtools
 
 
 # imgage folder
-img_prefix = 'F:/data/DOTA/train/images'
+img_prefix = '/media/data/DOTA/train/images'
 # position you save in dataset convertion.
 ann_file = '../label_convert/dota/train_dota_x1y1wh_polygen.json'
 coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
@@ -90,8 +85,17 @@ coco_analysis.vis_instances(save,
                             vis='segmentation', 
                             box_format='x1y1x2y2x3y3x4y4')
 
-save = 'dota/class_distribution/class_distribution.txt'
-coco_analysis.stats_class_distribution(save)
+# Size distribution analysis for each category
+save = 'size_per_cat_data.json'
+coco_analysis.stats_size_per_cat(save)
+
+# Average number of targets per image for each category
+save = 'stats_num.json'
+coco_analysis.stats_objs_per_img(save)
+
+# Analysis of target quantity per category
+save = 'objs_per_cat_data.json'
+coco_analysis.stats_objs_per_cat(save)
 
 save = 'dota/bbox_distribution/'
 coco_analysis.cluster_analysis(save, name_clusters=('area', ))
