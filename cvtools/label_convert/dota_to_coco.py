@@ -12,6 +12,7 @@ from PIL import Image
 import numpy as np
 
 import cvtools
+from cvtools.evaluation.class_names import get_classes
 
 
 class DOTA2COCO(object):
@@ -22,7 +23,7 @@ class DOTA2COCO(object):
             for example, '/home/data/DOTA/train/labelTxt'
         image_root (str): image path,
             for example, '/home/data/DOTA/train/images'
-        cls_map (str): file for dictionary{class_name: id, ...}
+        classes (str or list): class name in a file or a list.
         path_replace (dict): replace same things in images path,
             if not needed, you can just ignore it.
         box_form (str): coco bbox format, default 'x1y1wh'.
@@ -31,7 +32,7 @@ class DOTA2COCO(object):
     def __init__(self,
                  label_root,
                  image_root,
-                 cls_map='dota/cat_id_map.txt',
+                 classes=get_classes('dota'),
                  path_replace=None,
                  box_form='x1y1wh'):
         self.label_root = label_root
@@ -44,14 +45,18 @@ class DOTA2COCO(object):
         if cvtools._DEBUG:
             self.files = self.files[:10]
         self.lines = []
-        self.cls_map = cvtools.read_key_value(cls_map)
+        if isinstance(classes, str):
+            self.classes = cvtools.read_files_to_list(classes)
+        else:
+            self.classes = classes
+        self.cls_map = {name: i + 1 for i, name in enumerate(self.classes)}
         self.coco_dataset = {
             "info": {
                 "description": "This is stable 1.0 version of the DOTA.",
                 "url": "http://captain.whu.edu.cn/DOTAweb/index.html",
                 "version": "1.0", "year": 2018,
                 "contributor": "DOTA",
-                "date_created": cvtools.get_now_time_str()
+                "date_created": cvtools.get_time_str()
             },
             "categories": [],
             "images": [], "annotations": []
@@ -143,17 +148,21 @@ class DOTA2COCO(object):
                 box = list(map(lambda x: round(x, 2), box))
                 cat = line[8].strip()
                 difficult = int(line[9].strip())
-                self.coco_dataset['annotations'].append({
-                    'area': area,
-                    'bbox': box,
-                    'category_id': int(self.cls_map[cat]),  # 0 for backgroud
-                    'id': self.annID,
-                    'image_id': self.imageID,
-                    'iscrowd': 0,
-                    'ignore': ignore,
-                    'difficult': difficult,
-                    'segmentation': [polygon]
-                })
+                try:
+                    self.coco_dataset['annotations'].append({
+                        'area': area,
+                        'bbox': box,
+                        'category_id': int(self.cls_map[cat]),  # 0 for backgroud
+                        'id': self.annID,
+                        'image_id': self.imageID,
+                        'iscrowd': 0,
+                        'ignore': ignore,
+                        'difficult': difficult,
+                        'segmentation': [polygon]
+                    })
+                except KeyError:
+                    print("{} not in classes".format(cat))
+                    continue
                 self.annID += 1
             self.imageID += 1
 
@@ -171,11 +180,8 @@ class DOTA2COCO(object):
 
 
 if __name__ == '__main__':
-    label_root = 'D:/data/DOTA/train/labelTxt/'
-    # crop_label_root = '../label_analysis/doto/train/labelTxt+crop'
-    image_root = 'D:/data/DOTA/train/images/'
-    path_replace = {'\\': '/'}
-    dota_to_coco = DOTA2COCO(label_root, image_root,
-                             path_replace=path_replace, box_form='x1y1wh')
+    label_root = '/media/data/DOTA/train/labelTxt/'
+    image_root = '/media/data/DOTA/train/images/'
+    dota_to_coco = DOTA2COCO(label_root, image_root)
     dota_to_coco.convert()
-    dota_to_coco.save_json('dota/train_dota_x1y1wh_polygen.json')
+    dota_to_coco.save_json('/media/data/DOTA/json/train_dota_x1y1wh_polygen.json')
