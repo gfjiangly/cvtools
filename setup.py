@@ -4,9 +4,12 @@
 # @Site    : 
 # @File    : setup.py
 # @Software: PyCharm
+from setuptools import find_packages, setup, Extension, dist
 
-from setuptools import find_packages, setup, Extension
-import numpy as np
+dist.Distribution().fetch_build_eggs(['Cython', 'numpy>=1.11.1'])
+
+import numpy  # noqa: E402
+from Cython.Distutils import build_ext  # noqa: E402
 
 
 install_requires = [
@@ -27,7 +30,7 @@ ext_modules = [
     Extension(
         'cvtools.pycocotools._mask',
         sources=['cvtools/pycocotools/maskApi.c', 'cvtools/pycocotools/_mask.pyx'],
-        include_dirs=[np.get_include(), './'],
+        include_dirs=[numpy.get_include(), './'],
         extra_compile_args=[]  # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
     )
 ]
@@ -57,7 +60,8 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     install_requires=install_requires,
-    ext_modules= ext_modules,
+    ext_modules=ext_modules,
+    cmdclass={'build_ext': build_ext},
     zip_safe=False)
 
 """如果应用在开发过程中会频繁变更，每次安装还需要先将原来的版本卸掉，很麻烦。
