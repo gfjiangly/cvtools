@@ -96,8 +96,9 @@ class DOTA2COCO(object):
                 continue
 
             # add image information to dataset
-            for key, value in self.path_replace.items():
-                image_name = image_name.replace(key, value)
+            if self.path_replace:
+                for key, value in self.path_replace.items():
+                    image_name = image_name.replace(key, value)
             img_info = {
                 'file_name': image_name,    # relative path
                 'id': self.imageID,
