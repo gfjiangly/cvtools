@@ -82,6 +82,23 @@ def coco_classes():
     ]
 
 
+def dota_classes():
+    return [
+        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
+        'soccer-ball-field', 'basketball-court', 'ground-track-field', 'small-vehicle',
+        'harbor',  'baseball-diamond', 'tennis-court', 'roundabout', 'storage-tank'
+    ]
+
+
+def dota2_classes():
+    return [
+        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
+        'soccer-ball-field', 'basketball-court', 'ground-track-field', 'small-vehicle',
+        'harbor',  'baseball-diamond', 'tennis-court', 'roundabout', 'storage-tank',
+        'container-crane'
+    ]
+
+
 def rscup_classes():
     return [
         'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
@@ -103,7 +120,9 @@ dataset_aliases = {
     'imagenet_vid': ['vid', 'imagenet_vid', 'ilsvrc_vid'],
     'coco': ['coco', 'mscoco', 'ms_coco'],
     'wider_face': ['WIDERFaceDataset', 'wider_face', 'WDIERFace'],
-    'gender': ['gender']
+    'gender': ['gender'],
+    'dota': ['dota'],
+    'dota2': ['dota2']
 }
 
 
