@@ -15,7 +15,8 @@ from Cython.Distutils import build_ext  # noqa: E402
 install_requires = [
     'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
     'pyyaml', 'terminaltables', 'mmcv>=0.2.13',
-    'scikit-learn>=0.21.2', 'shapely>=1.6.4'
+    # 'scikit-learn>=0.21.2',
+    'shapely>=1.6.4'
 ]
 
 
@@ -28,8 +29,8 @@ def get_version():
 
 ext_modules = [
     Extension(
-        'cvtools.pycocotools._mask',
-        sources=['cvtools/pycocotools/maskApi.c', 'cvtools/pycocotools/_mask.pyx'],
+        'cvtools.cocotools._mask',
+        sources=['cvtools/cocotools/maskApi.c', 'cvtools/cocotools/_mask.pyx'],
         include_dirs=[numpy.get_include(), './'],
         extra_compile_args=[]  # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
     )

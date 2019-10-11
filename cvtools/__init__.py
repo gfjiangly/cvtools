@@ -4,7 +4,7 @@
 # @Site    : 
 # @File    : __init__.py
 # @Software: PyCharm
-from .pycocotools import *
+from .cocotools import *
 from .utils import *
 from .evaluation import *
 from .label_convert import *
