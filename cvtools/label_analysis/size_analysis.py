@@ -7,7 +7,7 @@
 from collections import defaultdict
 
 import cvtools
-from cvtools.pycocotools.coco import COCO
+from cvtools.cocotools.coco import COCO
 from cvtools.utils.misc import sort_dict
 
 

@@ -1,8 +1,8 @@
 import numpy as np
 import mmcv
 
-from cvtools.pycocotools.coco import COCO
-from cvtools.pycocotools.cocoeval import COCOeval
+from cvtools.cocotools.coco import COCO
+from cvtools.cocotools.cocoeval import COCOeval
 from .recall import eval_recalls
 
 
