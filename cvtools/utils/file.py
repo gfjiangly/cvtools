@@ -177,15 +177,21 @@ def check_rept(file):
 
 
 def makedirs(path):
-    if path is None or path == '':
+    """从路径中创建文件夹，可创建多层。
+    如果仅是文件名，则无须创建，返回False；
+    如果是已存在文件或路径，则无须创建，返回False"""
+    if path is None or path == '':  # 空
         return False
     if osp.isfile(path):    # 是文件并且已存在
         return False
+    # 不能使用os.sep，因为有时在windows平台下用户也会传入使用'/'分割的路径
+    if '/' not in path and '\\' not in path:  # 不含路径
+        return False
+    path = osp.dirname(path)
+    if osp.exists(path):
+        return False
     try:
-        if '.' in path:
-            path = osp.dirname(path)
-        if not osp.exists(path):
-            os.makedirs(path)
+        os.makedirs(path)
     except Exception as e:
         print(e, 'make dirs failed!')
         return False
