@@ -17,3 +17,9 @@ def test_timer_content(capsys):
     out, _ = capsys.readouterr()
     assert abs(float(out) - 1) < 1e-2
 
+
+def test_get_time_str():
+    print(cvtools.get_time_str())
+    print(cvtools.get_time_str(form='%Y-%m-%d %H:%M:%S.%f'))
+    print(cvtools.get_time_str(form='%Y%m%d_%H%M%S_%f'))
+

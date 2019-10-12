@@ -29,6 +29,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import time
+import datetime
 
 
 class Timer(object):
@@ -62,7 +63,8 @@ class Timer(object):
 
 def get_time_str(form='%Y%m%d_%H%M%S'):
     """for example form='%Y%m%d_%H%M%S_%f'"""
-    return time.strftime(form, time.localtime())
+    # return time.strftime(form, time.localtime())
+    return datetime.datetime.now().strftime(form)
 
 
 def get_timestamp_str():
