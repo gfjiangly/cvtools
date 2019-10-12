@@ -35,12 +35,14 @@ def read_file_to_list(file):
 
 
 # 保存list到文件
-def write_list_to_file(data, dst):
+def write_list_to_file(data, dst, line_break=True):
     images_list = []
     makedirs(dst)
     with open(dst, 'w') as f:
         for line in data:
-            f.write(line+'\n')
+            if line_break:
+                line += '\n'
+            f.write(line)
     return images_list
 
 
@@ -300,6 +302,11 @@ def isfile_casesensitive(path):
         return False   # exit early
     directory, filename = os.path.split(path)
     return filename in os.listdir(directory)
+
+
+def is_image_file(filename):
+    extensions = ['.jpg', '.png', '.jpeg', '.JPG', '.PNG', '.JPEG']
+    return any(filename.endswith(extension) for extension in extensions)
 
 
 if __name__ == "__main__":
