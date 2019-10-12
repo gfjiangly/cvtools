@@ -61,4 +61,9 @@ class Timer(object):
 
 
 def get_time_str(form='%Y%m%d_%H%M%S'):
+    """for example form='%Y%m%d_%H%M%S_%f'"""
     return time.strftime(form, time.localtime())
+
+
+def get_timestamp_str():
+    return str(int(round(time.time() * 1000000)))
