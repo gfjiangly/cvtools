@@ -158,7 +158,7 @@ def rotate_rects(rects, centers, angle):
         rects = np.array([rects])
     if not isinstance(centers, np.ndarray):
         centers = np.array([centers])
-    assert len(centers) > 0 and len(rects) == len(centers)
+    assert len(centers) == len(rects) > 0
     # assert 180 > angle > -180
 
     # 顺时针排列坐标
@@ -168,11 +168,11 @@ def rotate_rects(rects, centers, angle):
                        rects[:, 0:1], rects[:, 3:4]))
     coors = rects.reshape(-1, 2)
 
-    cosA = np.cos(np.pi / 180. * angle)
-    sinA = np.sin(np.pi / 180. * angle)
+    cosA = np.tile(np.cos(np.pi / 180. * angle), (4, 1))
+    sinA = np.tile(np.sin(np.pi / 180. * angle), (4, 1))
 
     x, y = coors[:, 0:1], coors[:, 1:2]
-    x0, y0 = centers[:, 0:1], centers[:, 1:2]
+    x0, y0 = np.tile(centers[:, 0:1], (4, 1)), np.tile(centers[:, 1:2], (4, 1))
 
     xn = (x - x0) * cosA - (y - y0) * sinA + x0
     yn = (x - x0) * sinA + (y - y0) * cosA + y0
