@@ -4,6 +4,7 @@
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
 import numpy as np
+import cv2.cv2 as cv
 
 
 def x1y1wh_to_x1y1x2y2(xywh):
@@ -157,7 +158,8 @@ def rotate_rects(rects, centers, angle):
         rects = np.array([rects])
     if not isinstance(centers, np.ndarray):
         centers = np.array([centers])
-    assert len(rects) == len(centers) > 0 and 180 > angle > -180
+    assert len(centers) > 0 and len(rects) == len(centers)
+    # assert 180 > angle > -180
 
     # 顺时针排列坐标
     rects = np.hstack((rects[:, :2],
@@ -187,6 +189,16 @@ def xywha_to_x1y1x2y2x3y3x4y4(xywha):
         return rotate_rects(xywha[:, :4], xywha[:, :2], xywha[:, 4:5])
     else:
         raise TypeError('Argument xywha must be a list, tuple, or numpy array.')
+
+
+def get_minAreaRect(cnt):
+    """返回：（中心(x,y), (宽,高), 旋转角度）"""
+    assert isinstance(cnt, np.ndarray)
+    cnt = cnt.reshape(-1, 2)
+    # the clockwise output convex hull in the Cartesian coordinate system
+    cnt_hull = cv.convexHull(cnt.astype(np.float32), clockwise=False)
+    xywha = cv.minAreaRect(cnt_hull)
+    return xywha
 
 
 if __name__ == '__main__':
