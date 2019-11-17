@@ -452,7 +452,7 @@ class SSDAugmentation(object):
 
 
 class RandomMirror(object):
-    def __call__(self, image, boxes):
+    def __call__(self, image, boxes, both=True):
         # _, width, _ = image.shape
         # if random.randint(2):
         #     image = image[:, ::-1]
@@ -461,9 +461,15 @@ class RandomMirror(object):
         if not isinstance(boxes, np.ndarray):
             boxes = np.array(boxes)     # 返回的数据类型一致性
         # 如果同时触发水平镜像和竖直镜像就等价于旋转180度
-        if random.randint(2):
+        flip_code = random.randint(4)
+        if not both:
+            flip_code = random.randint(3)
+        if flip_code == 1:
             image, boxes = horizontal_mirror(image, boxes)
-        if random.randint(2):
+        elif flip_code == 2:
+            image, boxes = vertical_mirror(image, boxes)
+        elif flip_code == 3:
+            image, boxes = horizontal_mirror(image, boxes)
             image, boxes = vertical_mirror(image, boxes)
         return image, boxes
 
