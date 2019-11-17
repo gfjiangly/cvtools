@@ -4,6 +4,9 @@
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
 from .crop_in_order import CropInOder
-from .augmentations import RandomRotate
+from .augmentations import RandomRotate, RandomVerMirror, RandomHorMirror, RandomMirror
 
-__all__ = ['CropInOder', 'RandomRotate']
+__all__ = [
+    'CropInOder',
+    'RandomRotate', 'RandomVerMirror', 'RandomHorMirror', 'RandomMirror'
+]
