@@ -1,8 +1,10 @@
-import torch
+#import torch
 import cv2
 import numpy as np
 import types
 from numpy import random
+
+import cvtools
 
 
 def intersect(box_a, box_b):
@@ -224,7 +226,11 @@ class RandomBrightness(object):
     def __call__(self, image, boxes=None, labels=None):
         if random.randint(2):
             delta = random.uniform(-self.delta, self.delta)
-            image += delta
+            # image += delta
+            image = image.astype(np.int)
+            np.add(image, delta, out=image, casting='unsafe')
+            image = np.clip(image, 0, 255)
+            image = image.astype(np.uint8)
         return image, boxes, labels
 
 
@@ -374,16 +380,6 @@ class Expand(object):
         return image, boxes, labels
 
 
-class RandomMirror(object):
-    def __call__(self, image, boxes, classes):
-        _, width, _ = image.shape
-        if random.randint(2):
-            image = image[:, ::-1]
-            boxes = boxes.copy()
-            boxes[:, 0::2] = width - boxes[:, 2::-2]
-        return image, boxes, classes
-
-
 class SwapChannels(object):
     """Transforms a tensorized image by swapping the channels in the order
      specified in the swap tuple.
@@ -453,3 +449,133 @@ class SSDAugmentation(object):
 
     def __call__(self, img, boxes, labels):
         return self.augment(img, boxes, labels)
+
+
+class RandomMirror(object):
+    def __call__(self, image, boxes, classes):
+        _, width, _ = image.shape
+        if random.randint(2):
+            image = image[:, ::-1]
+            boxes = boxes.copy()
+            boxes[:, 0::2] = width - boxes[:, 2::-2]
+        return image, boxes, classes
+
+
+def rotate_90(img, bboxes=None):
+    """顺时针旋转90度
+
+        bboxes支持的格式
+            两点式: x1y1x2y2,
+            四点式：x1y1x2y2x3y3x4y4
+
+    Args:
+        img(np.ndarray): the format of opencv image
+        bboxes(list or np.ndarray): supported format
+            two points: x1y1x2y2,
+            four points: x1y1x2y2x3y3x4y4
+    """
+    h, w, _ = img.shape
+    trans_img = cv2.transpose(img)
+    new_img = cv2.flip(trans_img, 1)
+    if bboxes is None:
+        return new_img
+    else:
+        # bounding box 的变换: 一个图像的宽高是W,H,
+        # 如果顺时90度转换，那么原来的原点(0, 0)到了 (H, 0) 这个最右边的顶点了，
+        # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
+        # 所以我们只要转换回到(0, 0) 这个点的距离即可！
+        # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        else:
+            bboxes = bboxes.copy()
+        box_coor_len = bboxes.shape[1]
+        x_axis = range(0, box_coor_len, 2)
+        y_axis = range(1, box_coor_len, 2)
+        ori_axis = range(box_coor_len)
+        new_axis = cvtools.concat_list(zip(y_axis, x_axis))
+        bboxes[:, ori_axis] = bboxes[:, new_axis]
+        bboxes[:, x_axis] = h - bboxes[:, x_axis]
+        return new_img, bboxes
+
+
+def rotate_270(img, bboxes=None):
+    """逆时针旋转90度
+
+        bboxes支持的格式
+            两点式: x1y1x2y2,
+            四点式：x1y1x2y2x3y3x4y4
+
+    Args:
+        img(np.ndarray): the format of opencv image
+        bboxes(list or np.ndarray): supported format
+            two points: x1y1x2y2,
+            four points: x1y1x2y2x3y3x4y4
+    """
+    h, w, _ = img.shape
+    trans_img = cv2.transpose(img)
+    new_img = cv2.flip(trans_img, 0)
+    if bboxes is None:
+        return new_img
+    else:
+        # bounding box 的变换: 一个图像的宽高是W,H,
+        # 如果顺时90度转换，那么原来的原点(0, 0)到了 (H, 0) 这个最右边的顶点了，
+        # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
+        # 所以我们只要转换回到(0, 0) 这个点的距离即可！
+        # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        box_coor_len = bboxes.shape[1]
+        x_axis = range(0, box_coor_len, 2)
+        y_axis = range(1, box_coor_len, 2)
+        ori_axis = range(box_coor_len)
+        new_axis = cvtools.concat_list(zip(y_axis, x_axis))
+        bboxes[:, ori_axis] = bboxes[:, new_axis]
+        bboxes[:, y_axis] = w - bboxes[:, y_axis]
+        return new_img, bboxes
+
+
+def rotate_180(img, bboxes=None):
+    """顺时针旋转180度
+
+        bboxes支持的格式
+            两点式: x1y1x2y2,
+            四点式：x1y1x2y2x3y3x4y4
+
+    Args:
+        img(np.ndarray): the format of opencv image
+        bboxes(list or np.ndarray): supported format
+            two points: x1y1x2y2,
+            four points: x1y1x2y2x3y3x4y4
+    """
+    h, w, _ = img.shape
+    new_img = cv2.flip(img, -1)
+    if bboxes is None:
+        return new_img
+    else:
+        # bounding box 的变换: 一个图像的宽高是W,H,
+        # 如果顺时90度转换，那么原来的原点(0, 0)到了 (H, 0) 这个最右边的顶点了，
+        # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
+        # 所以我们只要转换回到(0, 0) 这个点的距离即可！
+        # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        else:
+            bboxes = bboxes.copy()
+        box_coor_len = bboxes.shape[1]
+        x_axis = list(range(0, box_coor_len, 2))
+        y_axis = list(range(1, box_coor_len, 2))
+        bboxes[:, y_axis] = h - bboxes[:, y_axis]
+        bboxes[:, x_axis] = w - bboxes[:, x_axis]
+        return new_img, bboxes
+
+
+class RandomRotate(object):
+    """随机旋转0度、90度、180度、270度
+    """
+    def __call__(self, image, boxes, rotate=None):
+        if not rotate:
+            rotate = random.choice([None, 'rotate_90', 'rotate_180', 'rotate_270'])
+        if rotate:
+            image, boxes = eval(rotate)(image, boxes)
+        return image, boxes
