@@ -485,7 +485,10 @@ def rotate_90(img, bboxes=None):
         # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
         # 所以我们只要转换回到(0, 0) 这个点的距离即可！
         # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
-        bboxes = bboxes.copy()
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        else:
+            bboxes = bboxes.copy()
         box_coor_len = bboxes.shape[1]
         x_axis = range(0, box_coor_len, 2)
         y_axis = range(1, box_coor_len, 2)
@@ -520,7 +523,10 @@ def rotate_270(img, bboxes=None):
         # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
         # 所以我们只要转换回到(0, 0) 这个点的距离即可！
         # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
-        bboxes = bboxes.copy()
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        else:
+            bboxes = bboxes.copy()
         box_coor_len = bboxes.shape[1]
         x_axis = range(0, box_coor_len, 2)
         y_axis = range(1, box_coor_len, 2)
@@ -554,7 +560,10 @@ def rotate_180(img, bboxes=None):
         # 设图像中任何一个转换前的点(x1, y1), 转换后，x1, y1是表示到 (H, 0)这个点的距离，
         # 所以我们只要转换回到(0, 0) 这个点的距离即可！
         # 所以+90度转换后的点为 (H-y1, x1), -90度转换后的点为(y1, W-x1)
-        bboxes = bboxes.copy()
+        if not isinstance(bboxes, np.ndarray):
+            bboxes = np.array(bboxes)
+        else:
+            bboxes = bboxes.copy()
         box_coor_len = bboxes.shape[1]
         x_axis = list(range(0, box_coor_len, 2))
         y_axis = list(range(1, box_coor_len, 2))
