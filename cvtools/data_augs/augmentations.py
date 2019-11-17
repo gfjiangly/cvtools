@@ -452,13 +452,73 @@ class SSDAugmentation(object):
 
 
 class RandomMirror(object):
-    def __call__(self, image, boxes, classes):
-        _, width, _ = image.shape
+    def __call__(self, image, boxes):
+        # _, width, _ = image.shape
+        # if random.randint(2):
+        #     image = image[:, ::-1]
+        #     boxes = boxes.copy()
+        #     boxes[:, 0::2] = width - boxes[:, 2::-2]
+        if not isinstance(boxes, np.ndarray):
+            boxes = np.array(boxes)     # 返回的数据类型一致性
+        # 如果同时触发水平镜像和竖直镜像就等价于旋转180度
         if random.randint(2):
-            image = image[:, ::-1]
-            boxes = boxes.copy()
-            boxes[:, 0::2] = width - boxes[:, 2::-2]
-        return image, boxes, classes
+            image, boxes = horizontal_mirror(image, boxes)
+        if random.randint(2):
+            image, boxes = vertical_mirror(image, boxes)
+        return image, boxes
+
+
+def horizontal_mirror(image, boxes):
+    """水平方向（flipping around the y-axis）镜像"""
+    _, width, _ = image.shape
+    image = cv2.flip(image, 1)  # 不修改原图，image内存连续
+    # image = image[:, ::-1]    # image不内存连续
+    boxes = boxes.copy()
+    box_coor_len = boxes.shape[1]
+    if box_coor_len == 4:   # 对角线形式，一般而言认为第一个点是左上点
+        boxes[:, 0::2] = width - boxes[:, 2::-2]
+    elif box_coor_len == 8:  # polygon形式不改变点的相邻关系
+        boxes[:, 0::2] = width - boxes[:, 0::2]
+    else:
+        raise NotImplementedError
+    return image, boxes
+
+
+class RandomHorMirror(object):
+    """水平方向（flipping around the y-axis）镜像"""
+    def __call__(self, image, boxes, r=True):
+        """image参数被原位修改，boxes参数不会被修改"""
+        if not isinstance(boxes, np.ndarray):
+            boxes = np.array(boxes)     # 返回的数据类型一致性
+        if not r or random.randint(2):
+            image, boxes = horizontal_mirror(image, boxes)
+        return image, boxes
+
+
+def vertical_mirror(image, boxes):
+    height, _, _ = image.shape
+    image = cv2.flip(image, 0)  # 不修改原图，image内存连续
+    # image = image[::-1]  # image不内存连续
+    box_coor_len = boxes.shape[1]
+    boxes = boxes.copy()
+    if box_coor_len == 4:
+        boxes[:, 1::2] = height - boxes[:, 3::-2]
+    elif box_coor_len == 8:
+        boxes[:, 1::2] = height - boxes[:, 1::2]
+    else:
+        raise NotImplementedError
+    return image, boxes
+
+
+class RandomVerMirror(object):
+    """竖直方向（flipping around the x-axis）镜像"""
+    def __call__(self, image, boxes):
+        """image参数被原位修改，boxes参数不会被修改"""
+        if not isinstance(boxes, np.ndarray):
+            boxes = np.array(boxes)     # 返回的数据类型一致性
+        if random.randint(2):
+            image, boxes = vertical_mirror(image, boxes)
+        return image, boxes
 
 
 def rotate_90(img, bboxes=None):
