@@ -42,20 +42,18 @@ class CropLargeImages(Crop):
                 continue
             # self.crop_for_protected.size_th = max(img.shape[:2])
             for over_cat in over_samples:
+                # 选出少样本类别实例
                 protected_anns, protected_ann_ids = [], []
                 for ann_index, ann in enumerate(anns):
                     if self.cat_id_to_name[ann['category_id']] == over_cat:
                         protected_anns.append(ann)
                         protected_ann_ids.append(ann_index)
-                if len(protected_anns) == 0:
-                    continue
-                protected_ann_ids = np.array(protected_ann_ids)
+                if len(protected_anns) == 0: continue
                 for _ in range(over_samples[over_cat]):
                     if len(self.crop_for_protected(img, protected_anns)):
                         add_croped = self.crop_for_protected.match_anns(
-                            protected_anns)
-                        for img_box, ann_ids in add_croped.items():
-                            cropped[img_box] = protected_ann_ids[ann_ids]
+                            anns)  # fix bug! must using all anns
+                        cropped.update(add_croped)
                     else:
                         print('Protection cropping failure!')
 
