@@ -82,14 +82,15 @@ def crop_for_large_img(img, overlap=0.1, size_th=1333):
 
 def crop_for_protected(img, anns, size_th=1024):
     # 3 滑窗裁剪中被破坏的大目标
-    def cal_edge(objs):
+    def cal_edge(objs, size):
         """求所有segmentation的外接矩形，也可以求所有bbox的外接矩形"""
         obbs = np.array([obj['segmentation'][0]
                          for obj in objs]).reshape(-1, 2)
         x1, y1 = np.min(obbs[..., 0]), np.min(obbs[..., 1])
         x2, y2 = np.max(obbs[..., 0]), np.max(obbs[..., 1])
-        x_tolerate = size_th - (x2 - x1 + 1)
-        y_tolerate = size_th - (y2 - y1 + 1)
+        if size < (x2 - x1 + 1) * 2: size = (x2 - x1 + 1) * 2
+        x_tolerate = size - (x2 - x1 + 1)
+        y_tolerate = size - (y2 - y1 + 1)
         if x_tolerate < 0 or y_tolerate < 0:
             return ()
         new_x1 = random.randint(x1 - x_tolerate // 2, x1)
@@ -103,11 +104,11 @@ def crop_for_protected(img, anns, size_th=1024):
         new_y2 = h - 1 if new_y2 >= h else new_y2
         return new_x1, new_y1, new_x2, new_y2
     img_boxes = []
-    all_protect_crop = cal_edge(anns)
+    all_protect_crop = cal_edge(anns, size_th)
     if len(all_protect_crop) > 0:
         img_boxes.append(all_protect_crop)
     if len(anns) > 1:   # 为每个大实例做裁剪
-        each_protect_crops = [cal_edge([obj]) for obj in anns
+        each_protect_crops = [cal_edge([obj], size_th) for obj in anns
                               if obj['bbox'][2] * obj['bbox'][3] > 96 * 96]
         img_boxes += [crop for crop in each_protect_crops if len(crop) > 0]
     return img_boxes
@@ -134,9 +135,6 @@ class CropImageInOrder(CropMethod):
         self.size_th = size_th
         self.img_boxes = []
 
-    def __call__(self, img, anns=None):
-        return self.crop(img, anns)
-
     def crop(self, img, anns=None):
         self.img_boxes = sliding_crop(img, self.crop_w, self.crop_h,
                                       self.overlap)
@@ -149,9 +147,6 @@ class CropImageProtected(CropMethod):
         super().__init__(iof_th)
         self.size_th = size_th
         self.img_boxes = []
-
-    def __call__(self, img, anns):
-        return self.crop(img, anns)
 
     def crop(self, img, anns=None):
         self.img_boxes = crop_for_protected(img, anns, self.size_th)
@@ -180,9 +175,6 @@ class CropImageAdaptive(CropMethod):
         self.strict_size = strict_size
         self.img_boxes = []
 
-    def __call__(self, img, anns=None):
-        return self.crop(img, anns)
-
     def crop(self, img, anns=None):
         """
         可能crop算法可能需要根据标签信息
@@ -196,10 +188,10 @@ class CropImageAdaptive(CropMethod):
         if len(self.img_boxes) == 0:
             self.img_boxes = crop_for_large_img(img)
         if len(self.img_boxes) == 0:
-            self.img_boxes = [(0, 0, img.shape[1], img.shape[0])]
+            self.img_boxes = [(0, 0, img.shape[1] - 1, img.shape[0] - 1)]
             return  # 不需要裁剪
         if not self.strict_size:
-            self.img_boxes.append((0, 0, img.shape[1], img.shape[0]))
+            self.img_boxes.append((0, 0, img.shape[1] - 1, img.shape[0] - 1))
         # 以下操作不保证可以增加self.img_boxes元素
         gt_boxes = [obj['bbox'] for obj in anns]
         if len(gt_boxes) == 0:
