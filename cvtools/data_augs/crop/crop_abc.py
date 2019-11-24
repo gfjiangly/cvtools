@@ -43,6 +43,9 @@ class CropMethod(object):
         self.iof_th = iof_th
         self.img_boxes = []
 
+    def __call__(self, img, anns):
+        return self.crop(img, anns)
+
     def crop(self, img, anns=None):
         raise NotImplementedError
 
