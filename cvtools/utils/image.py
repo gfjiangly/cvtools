@@ -14,6 +14,7 @@ import copy
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import font_manager as fm
+from matplotlib.pyplot import MultipleLocator
 
 import cvtools
 
@@ -48,12 +49,17 @@ def imread(img_or_path, flag='color'):
         cvtools.check_file_exist(img_or_path, 'img file does not exist: {}'.format(img_or_path))
         try:
             "PIL: Open an image file, without loading the raster data"
-            Image.open(img_or_path)
+            img_pil = Image.open(img_or_path)
             # im = cv2.imdecode(np.fromfile(image_name, dtype=np.uint8), cv2.IMREAD_COLOR)
         except (FileNotFoundError, Image.DecompressionBombError) as e:
             print(e)
             return None
-        return cv.imdecode(np.fromfile(img_or_path, dtype=np.uint8), flag)
+        img_opencv = cv.imdecode(np.fromfile(img_or_path, dtype=np.uint8), flag)
+        if img_opencv is None:
+            img_opencv = np.array(img_pil)
+            if len(img_opencv.shape) == 3:
+                img_opencv = img_opencv[:, :, -1]
+        return img_opencv
     else:
         raise TypeError('"img" must be a numpy array or a filename')
 
@@ -128,7 +134,7 @@ def draw_boxes_texts(img,
                      texts=None,
                      colors=None,
                      line_width=1,
-                     draw_start=True,
+                     draw_start=False,
                      box_format='x1y1x2y2'):
     """Draw bboxes on an image.
 
@@ -139,17 +145,17 @@ def draw_boxes_texts(img,
         colors (list[tuple or Color]): A list of colors.
         line_width (int): Thickness of lines.
         draw_start (bool): Draw a dot at the first vertex of the box.
-        box_format (str): x1y1x2y2(default), x1y1wh, xywh, xywha, polygen
+        box_format (str): x1y1x2y2(default), x1y1wh, xywh, xywha, polygon
     """
     assert box_format in ('x1y1x2y2', 'x1y1wh', 'xywh', 'xywha',
-                          'polygen'), 'not supported box format!'
+                          'polygon'), 'not supported box format!'
     img = imread(img)
     if len(boxes) == 0:
         return img
     boxes = copy.deepcopy(boxes)
     # convert bbox type to int
     if not isinstance(boxes, np.ndarray):
-        if box_format != 'polygen':
+        if box_format != 'polygon':
             boxes = np.array(boxes)
             if box_format != 'xywha':
                 boxes = boxes.astype(np.int)
@@ -191,12 +197,14 @@ def draw_boxes_texts(img,
             # box = np.int0(box)
             cv.drawContours(img, [box], 0, box_color, thickness)
             box = box.reshape((-1,))
-        elif box_format == 'polygen':
-            for i in np.arange(2, len(box), 2):
-                cv.line(img, tuple(box[i-2:i]),
-                        tuple(box[i:i+2]), box_color, thickness)
-            cv.line(img, tuple(box[-2:]),
-                    tuple(box[:2]), box_color, thickness)
+        elif box_format == 'polygon':
+            # for i in np.arange(2, len(box), 2):
+            #     cv.line(img, tuple(box[i-2:i]),
+            #             tuple(box[i:i+2]), box_color, thickness)
+            # cv.line(img, tuple(box[-2:]),
+            #         tuple(box[:2]), box_color, thickness)
+            # 如果img内存非连续，cv的所有绘制都会失效
+            cv.polylines(img, np.int32([np.array(box).reshape(-1, 2)]), 1, box_color, thickness)
             # cv.line(img, tuple(box[:2]), tuple(box[2:4]), box_color, thickness)
             # cv.line(img, tuple(box[2:4]), tuple(box[4:6]), box_color, thickness)
             # cv.line(img, tuple(box[4:6]), tuple(box[6:8]), box_color, thickness)
@@ -245,6 +253,7 @@ def draw_class_distribution(y, save_name='class_distribution.png'):
 def draw_hist(data, bins=10,
               x_label="区间", y_label="频数/频率",
               title="频数/频率分布直方图",
+              show=True,
               save_name='hist.png', density=True):
     """
     绘制直方图
@@ -267,5 +276,14 @@ def draw_hist(data, bins=10,
     plt.ylabel(y_label)
     # 显示图标题
     plt.title(title)
-    plt.savefig(save_name, dpi=300)
 
+    # ax为两条坐标轴的实例
+    # ax = plt.gca()
+    # x_major_locator = MultipleLocator(0.1)
+    # ax.xaxis.set_major_locator(x_major_locator)
+
+    # plt.xlim(-1., 1.)
+
+    if show:
+        plt.show()
+    plt.savefig(save_name, dpi=300)
