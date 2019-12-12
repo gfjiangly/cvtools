@@ -38,6 +38,8 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'recommonmark',
 ]
 
@@ -76,3 +78,20 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
+
+
+def run_apidoc(_):
+    from sphinx.ext.apidoc import main
+    parentFolder = os.path.join(os.path.dirname(__file__), '..')
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(parentFolder)
+    module = os.path.join(parentFolder, 'cvtools')
+    output_path = os.path.join(cur_dir, 'api')
+    main(['-e', '-f', '-o', output_path, module])
+
+
+def setup(app):
+    # overrides for wide tables in RTD theme
+    app.add_stylesheet('theme_overrides.css')
+    # trigger the run_apidoc
+    app.connect('builder-inited', run_apidoc)
