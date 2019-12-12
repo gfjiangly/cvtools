@@ -35,9 +35,3 @@ utils
 -----
 .. automodule:: cvtools.utils
    :members:
-
-
-label_analysis
--------------
-.. automodule:: cvtools.label_analysis
-   :members:
