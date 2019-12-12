@@ -36,7 +36,7 @@ class CocoDatasetForCrop(CropDataset):
         image_ids.sort()
         self.roidb = self.COCO.loadImgs(image_ids)
         if cvtools._DEBUG:
-            self.roidb = self.roidb[:50]
+            self.roidb = self.roidb[:100]
 
     def __getitem__(self, item):
         entry = self.roidb[item]
@@ -64,8 +64,7 @@ class CocoDatasetForCrop(CropDataset):
             image_info = self.roidb[image_i]
             ann_ids = self.COCO.getAnnIds(imgIds=image_info['id'], iscrowd=None)
             anns = self.COCO.loadAnns(ann_ids)
-            if not crops[image_i]:
-                continue
+            if not crops[image_i]: continue
             for img_box, ann_indexes in crops[image_i].items():
                 new_image_info = copy.deepcopy(image_info)
                 new_image_info['crop'] = img_box
