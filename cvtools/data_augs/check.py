@@ -26,8 +26,13 @@ def check_annots(file, save):
 
 
 if __name__ == '__main__':
-    data_list = ['labels/gen/Thread-0_gen_annots.txt', 'labels/gen/Thread-1_gen_annots.txt',
-                 'labels/gen/Thread-2_gen_annots.txt', 'labels/train/elevator_20181230_convert_train.txt',
-                 'labels/train/elevator_20181231_convert_train.txt', 'labels/train/elevator_20190106_convert_train.txt',
-                 'labels/train/person_7421_train.txt']
+    data_list = [
+        'labels/gen/Thread-0_gen_annots.txt',
+        'labels/gen/Thread-1_gen_annots.txt',
+        'labels/gen/Thread-2_gen_annots.txt',
+        'labels/train/elevator_20181230_convert_train.txt',
+        'labels/train/elevator_20181231_convert_train.txt',
+        'labels/train/elevator_20190106_convert_train.txt',
+        'labels/train/person_7421_train.txt'
+    ]
     check_annots(data_list, 'check_51k.txt')
