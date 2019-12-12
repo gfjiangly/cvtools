@@ -9,13 +9,14 @@ cvtools is a helpful python library for computer vision.
 
 It provides the following functionalities.
 
-- Universal IO APIs
 - Dataset Conversion(voc to coco, bdd to coco, ...)
-- Dataset Analysis(visualization, cluster analysis, ...)
 - Data Augmentation(random mirror, random sample crop, ...)
+- Dataset Analysis(visualization, cluster analysis, ...)
 - Image processing(crop, resize, ...)
 - Useful utilities (iou, timer, ...)
+- Universal IO APIs
 
+See the [documentation][https://cvtools.readthedocs.io/zh/latest] for more features and usage.
 
 Installation
 ------------
