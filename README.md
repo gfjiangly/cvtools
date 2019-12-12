@@ -16,7 +16,7 @@ It provides the following functionalities.
 - Useful utilities (iou, timer, ...)
 - Universal IO APIs
 
-See the [documentation][https://cvtools.readthedocs.io/zh/latest] for more features and usage.
+See the [documentation](https://cvtools.readthedocs.io/zh/latest) for more features and usage.
 
 Installation
 ------------
