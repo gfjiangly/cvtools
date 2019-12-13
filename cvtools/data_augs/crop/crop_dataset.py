@@ -55,7 +55,7 @@ class CocoDatasetForCrop(CropDataset):
     def __len__(self):
         return len(self.roidb)
 
-    def save(self, crops, to_file):
+    def save(self, crops, to_file, limit_border=False):
         new_images = []
         new_annotations = []
         image_id = 1
@@ -73,7 +73,8 @@ class CocoDatasetForCrop(CropDataset):
                 crop_anns = [anns[index] for index in ann_indexes]
                 # 不能修改原始数据，因为同一个ann可能分布在多个图片中
                 crop_anns = copy.deepcopy(crop_anns)
-                self.recalc_anns(img_box, crop_anns)
+                if limit_border:
+                    self.recalc_anns(img_box, crop_anns)
                 for ann in crop_anns:
                     self.trans_ann(ann, img_box)
                     ann['id'] = ann_id
