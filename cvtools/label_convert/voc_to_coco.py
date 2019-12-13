@@ -15,8 +15,8 @@ class VOC2COCO(object):
         cls (str or list): class name in a file or a list.
         cls_replace (dict): a dictionary for replacing class name. if not needed,
             you can just ignore it.
-        use_xml_name (bool): image filename source, if true, using filename
-            in xml for the image, otherwise using file list name for the image.
+        use_xml_name (bool): image filename source, if true, using the same name as xml
+            for the image, otherwise using 'filename' in xml context for the image.
         read_test (bool): Test if the picture can be read normally.
     """
 
@@ -74,6 +74,7 @@ class VOC2COCO(object):
                 'name': cls,
                 'supercategory': cls
             })
+
         for index, xml_path in enumerate(self.xml_paths):
             print('parsing xml {} of {}: {}.xml'.format(
                 index+1, len(self.imgs), self.imgs[index]))
@@ -83,13 +84,22 @@ class VOC2COCO(object):
                 print('file {} is not found!'.format(xml_path))
                 continue
             root = tree.getroot()
-            img_path = 'JPEGImages/{}'.format(root.find('filename').text)
-            if not self.use_xml_name:
-                img_path = self.img_paths[index]
+            # try:
+            #     verified = root.attrib['verified']
+            #     if verified == 'yes':
+            #         verified = True
+            # except KeyError:
+            #     verified = False
+            # if not verified:
+            #     print('not verified, filter image {}'.format(img_path))
+            #     continue
             size = root.find('size')
             w = int(size.find('width').text)
             h = int(size.find('height').text)
 
+            img_path = self.img_paths[index]
+            if not self.use_xml_name:
+                img_path = 'JPEGImages/{}'.format(root.find('filename').text)
             img_path = self.check_image(img_path)
             if img_path is None:
                 print('{} failed to pass inspection'.format(self.xml_paths))

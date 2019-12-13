@@ -14,22 +14,29 @@ import cvtools
 
 class Arcsoft2COCO(object):
     """convert arcsoft format label to standard coco format."""
-    def __init__(self, path, cls_map='arcsoft/cat_id_map.txt', path_replace=None, img_suffix='.jpg'):
+    def __init__(self,
+                 path,
+                 cls_map='arcsoft/cat_id_map.txt',
+                 path_replace=None,
+                 img_suffix='.jpg'):
         self.path = path
         self.path_replace = path_replace
         self.img_suffix = img_suffix
-        self.txt_list = cvtools.get_files_list(self.path, file_type='.txt', basename=True)
-        # you could comment this sentence if you don't want check integrity of images and labels.
-        # self.img_list = cvtools.get_files_list(self.path, file_type=img_suffix)
+        self.txt_list = cvtools.get_files_list(
+            self.path, file_type='.txt', basename=True)
+        # you could comment this two sentences if you don't want check integrity
+        # of images and labels.
+        # self.img_list = cvtools.get_files_list(
+        #     self.path, file_type=img_suffix)
         # assert len(self.img_list) == len(self.txt_list)
         self.cls_map = cvtools.read_key_value(cls_map)
         self.coco_dataset = {
             "info": {
-                "description": "This is unstable 0.0.0 version of the 2019 Projects Data.",
+                "description": "Open Dataset.",
                 "url": "http://www.arcsoft.com",
                 "version": "1.0", "year": 2019,
                 "contributor": "arcsoft",
-                "date_created": cvtools.get_now_time_str()
+                "date_created": cvtools.get_time_str()
             },
             "categories": [],  # Not added yet
             "images": [], "annotations": []
@@ -43,7 +50,7 @@ class Arcsoft2COCO(object):
         id_cats = {value: key for key, value in self.cls_map.items()}
         for key, value in id_cats.items():
             self.coco_dataset['categories'].append({
-                'id': int(key),
+                'id': int(key),  # 0 for backgroud
                 'name': value,
                 'supercategory': value
             })
@@ -56,11 +63,12 @@ class Arcsoft2COCO(object):
                 # "PIL: Open an image file, without loading the raster data"
                 im = Image.open(img_file)
                 if im is None:
-                    print('Waring: !!!can\'t read %s, continue this image' % img_file)
+                    print('Waring: !!!can\'t read %s, continue this image'
+                          % img_file)
                     continue
                 width, height = im.size
             except (FileNotFoundError, Image.DecompressionBombError) as e:
-                print(e)    # Image.DecompressionBombError for the big size image
+                print(e)  # Image.DecompressionBombError for the big size image
                 continue
 
             # add image information to dataset
@@ -79,7 +87,8 @@ class Arcsoft2COCO(object):
             if len(labels) == 0:
                 continue
             for label in labels:
-                label = label_processor(label)    # change here for specific labels
+                # change here for specific labels
+                label = label_processor(label)
                 if len(label['bbox']) == 0:
                     continue    # may be not happened
                 label['id'] = self.annID
@@ -87,7 +96,7 @@ class Arcsoft2COCO(object):
                 label['segmentation'] = []
                 label['iscrowd'] = 0
                 try:
-                    label['category_id'] = int(self.cls_map[label['category']])  # 0 for backgroud
+                    label['category_id'] = int(self.cls_map[label['category']])
                 except KeyError:
                     print('skip file: {}'.format(txt_file))
                     break
@@ -107,8 +116,8 @@ class Arcsoft2COCO(object):
 
 if __name__ == '__main__':
     path_replace = {'\\': '/'}
-    arcsoft_to_coco = Arcsoft2COCO('F:/data/person',
-                                   cls_map='arcsoft/gender_id_map.txt',
+    arcsoft_to_coco = Arcsoft2COCO('E:/data/person',
+                                   cls_map='arcsoft/head_id_map.txt',
                                    path_replace=path_replace, img_suffix='.jpg')
-    arcsoft_to_coco.convert(label_processor=cvtools.gender_reserved)
-    arcsoft_to_coco.save_json('arcsoft/person_gender.json')
+    arcsoft_to_coco.convert(label_processor=cvtools.head_reserved)
+    arcsoft_to_coco.save_json('arcsoft/person_head.json')

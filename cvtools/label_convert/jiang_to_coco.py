@@ -10,7 +10,7 @@ from tqdm import tqdm
 from PIL import Image
 
 from cvtools.utils.file import read_files_to_list
-from cvtools.utils.timer import get_now_time_str
+from cvtools.utils.timer import get_time_str
 from cvtools.utils.file import read_key_value
 
 
@@ -32,11 +32,12 @@ class Jiang2COCO(object):
         self.annID = 1
         self.coco_dataset = {
             "info": {
-                "description": "This is stable 0.0.0 version of the 2019 jiang's dataset format.",
-                "url": "http://www.gfjiang.com",
+                "description": "This is stable 0.0.0 version "
+                               "of the 2019 jiang's dataset format.",
+                "url": "https://github.com/gfjiangly/cvtools",
                 "version": "0.1", "year": 2019,
                 "contributor": "jiang",
-                "date_created": get_now_time_str()
+                "date_created": get_time_str()
             },
             "categories": [],
             "images": [], "annotations": []
@@ -55,22 +56,18 @@ class Jiang2COCO(object):
             image_name = line[0]
             for key, value in self.path_replace.items():
                 image_name = image_name.replace(key, value)
-            # im = cv2.imdecode(np.fromfile(image_name, dtype=np.uint8), cv2.IMREAD_COLOR)
-            # if im is None:
-            #     print('Waring: !!!can\'t read %s, continue this image' % image_name)
-            #     continue
-            # height, width, _ = im.shape
 
             # read the image to get width and height
             try:
                 # "PIL: Open an image file, without loading the raster data"
                 im = Image.open(image_name)
                 if im is None:
-                    print('Waring: !!!can\'t read %s, continue this image' % image_name)
+                    print('Waring: !!!can\'t read %s, continue this image'
+                          % image_name)
                     continue
                 width, height = im.size
             except (FileNotFoundError, Image.DecompressionBombError) as e:
-                print(e)    # Image.DecompressionBombError for the big size image
+                print(e)   # Image.DecompressionBombError for the big size image
                 continue
 
             # 添加图像的信息到dataset中
@@ -119,28 +116,10 @@ class Jiang2COCO(object):
 
 
 if __name__ == '__main__':
-
     root_path = 'jiang/label/train/'
-    # files_list = ['elevator_20181230_convert_train.txt', 'elevator_20181231_convert_train.txt',
-    #               'elevator_20190106_convert_train.txt', 'person_7421_train.txt']
-    # phase = 'train'
-    #
-    # files_list = ['elevator_20181230_convert_test.txt', 'elevator_20181231_convert_test.txt',
-    #               'elevator_20190106_convert_test.txt', 'person_1856_test.txt']
-    # # files_list = ['elevator_20181230_convert_test.txt']
-    # phase = 'test'
-    #
-    # path_replace = {'E:/头肩检测分类/data/': '/home/arc-fsy8515/data/',
-    #                 '/root/data/': '/home/arc-fsy8515/data/',
-    #                 'E:/data': '/home/arc-fsy8515/data/'}
-
     files_list = ['our_train.txt']
     path_place = {'/root/data/': 'F:/data/detection/'}
     jiang2coco = Jiang2COCO(root_path, files_list, path_replace=path_place,
                             cls_map='jiang/our_cat_id_map.txt')
     jiang2coco.convert()
     jiang2coco.save_json(to_file='jiang/our.json')
-
-
-
-
