@@ -16,7 +16,7 @@ install_requires = [
     'numpy>=1.11.1', 'opencv-python', 'pillow', 'matplotlib', 'tqdm',
     'pyyaml', 'terminaltables', 'mmcv>=0.2.13',
     # 'scikit-learn>=0.21.2',
-    'shapely>=1.6.4'
+    'shapely>=1.6.4', 'terminaltables'
 ]
 
 
@@ -32,7 +32,8 @@ ext_modules = [
         'cvtools.cocotools._mask',
         sources=['cvtools/cocotools/maskApi.c', 'cvtools/cocotools/_mask.pyx'],
         include_dirs=[numpy.get_include(), './'],
-        extra_compile_args=[]  # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
+        # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
+        extra_compile_args=[]
     )
 ]
 

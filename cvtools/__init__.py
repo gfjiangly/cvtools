@@ -4,8 +4,14 @@
 # @Site    : 
 # @File    : __init__.py
 # @Software: PyCharm
+"""
+cvtools是主要用于计算机视觉领域的Python工具包。
+在实现和训练CV模型过程，一些与核心无关的常用代码被剥离出，形成此库。
+"""
+
 from .cocotools import *
 from .utils import *
+from .file_io import *
 from .evaluation import *
 from .label_convert import *
 from .label_analysis import *
@@ -13,5 +19,5 @@ from .data_augs import *
 from .version import __version__
 
 
-_DEBUG = True
+_DEBUG = False
 
