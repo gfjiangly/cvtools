@@ -12,7 +12,6 @@ from .augmentations import RandomSampleCrop
 from .augmentations import Expand
 from .augmentations import (RandomRotate, RandomVerMirror, RandomHorMirror,
                             RandomMirror)
-from .crop_in_order import CropInOder
 
 
 __all__ = [
@@ -24,6 +23,4 @@ __all__ = [
     'RandomSampleCrop',
     'Expand',
     'RandomRotate', 'RandomVerMirror', 'RandomHorMirror', 'RandomMirror',
-    # outline
-    'CropInOder',
 ]

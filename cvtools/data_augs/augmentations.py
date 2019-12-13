@@ -478,12 +478,18 @@ class RandomMirror(object):
 
 
 def horizontal_mirror(image, boxes):
-    """水平方向（flipping around the y-axis）镜像"""
+    """水平方向（flipping around the y-axis）镜像
+
+    Args:
+        image(np.ndarray): numpy数组
+        boxes(np.ndarray): numpy数组，nx4 or nx8
+    """
     _, width, _ = image.shape
     image = cv2.flip(image, 1)  # 不修改原图，image内存连续
     # image = image[:, ::-1]    # image不内存连续
     boxes = boxes.copy()
     box_coor_len = boxes.shape[1]
+    # TODO： 分离bbox和polygon
     if box_coor_len == 4:   # 对角线形式，一般而言认为第一个点是左上点
         boxes[:, 0::2] = width - boxes[:, 2::-2]
     elif box_coor_len == 8:  # polygon形式不改变点的相邻关系
