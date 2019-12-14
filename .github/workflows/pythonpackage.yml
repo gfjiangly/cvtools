@@ -26,8 +26,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install cython
-        git clone https://github.com/open-mmlab/mmcv.git
-        pip install -e mmcv
         pip install -r requirements.txt
         pip install -e .
 #    - name: Lint with flake8
