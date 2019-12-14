@@ -124,7 +124,15 @@ def x1y1wh_to_xywh(x1y1wh):
 def rotate_rect(rect, center, angle):
     """一个数学问题：2x2矩阵（坐标）与旋转矩阵相乘.
     在笛卡尔坐标系中，angle>0, 逆时针旋转; angle<0, 顺时针旋转
-    return: x1y1x2y2x3y3x4y4 format box
+
+    Args:
+        rect: x1y1x2y2形式矩形
+        center: 旋转中心点
+        angle: 旋转角度，范围在(-180, 180)
+
+    Returns:
+        x1y1x2y2x3y3x4y4 format box
+
     """
     assert 180 > angle > -180
     # 顺时针排列坐标
