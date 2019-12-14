@@ -4,7 +4,7 @@
 # @Site    : 
 # @File    : setup.py
 # @Software: PyCharm
-from setuptools import find_packages, setup, Extension, dist
+from setuptools import Extension, dist, find_packages, setup
 
 dist.Distribution().fetch_build_eggs(['Cython', 'numpy>=1.11.1'])
 
@@ -20,11 +20,17 @@ install_requires = [
     'tqdm',
     'pyyaml',
     'terminaltables',
-    'mmcv>=0.2.13',
+    'mmcv>=0.2.10',
     # 'scikit-learn>=0.21.2',
     'shapely>=1.6.4',
     'terminaltables',
 ]
+
+
+def readme():
+    with open('README.md', encoding='utf-8') as f:
+        content = f.read()
+    return content
 
 
 def get_version():
@@ -48,22 +54,7 @@ setup(
     name='cvtoolss',
     version=get_version(),
     description='Computer Vision Foundation Utilities',
-    long_description="""cvtools is a Python toolkit mainly used in the field of 
-    computer vision. In the process of implementing and training the CV model, 
-    some common code unrelated to the core was stripped out to form this library.
-    
-    It provides the following functions:
-       
-       - Data set format conversion (voc-> coco, dota-> coco, etc.)
-       - Data augmentation (such as rotation, random cropping, 
-            color transformation, etc.)
-       - Data label analysis (such as statistics, number of instances, 
-            proportion, distribution, etc.)
-       - Evaluation of model output results
-       - Common input and output APIs
-       - Some useful functions (such as visualizing model output, 
-            calculating IoU, etc.)
-    """,
+    long_description=readme(),
     keywords='computer vision',
     packages=find_packages(),
     classifiers=[
