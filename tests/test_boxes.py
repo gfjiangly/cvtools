@@ -10,7 +10,8 @@ import cvtools
 
 
 def test_rotate_rects():
-    rects = np.array([[100, 200, 300, 400]])
-    center = np.array([[200, 300]])
-    angle = np.array([[45]])
-    cvtools.rotate_rects(rects, center, angle)
+    rects = np.array([[100, 200, 300, 400], [101, 201, 301, 401]])
+    center = np.array([[200, 300], [201, 301]])
+    angle = np.array([45, 30])
+    new_boxes = cvtools.rotate_rects(rects, center, angle)
+    print(new_boxes)
