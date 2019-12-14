@@ -13,10 +13,13 @@ PyTorch_REST_API_URL = 'http://10.193.0.20:666/detect_hat'
 def detect_hat(image_path):
     # Initialize image path
     image = open(image_path, 'rb').read()
-    payload = {'image': image}
+    form = {
+        'filename': image_path + "1"
+    }
+    multipart = {'image': image}
 
     # Submit the request.
-    r = requests.post(PyTorch_REST_API_URL, files=payload).json()
+    r = requests.post(PyTorch_REST_API_URL, data=form, files=multipart).json()
 
     # Ensure the request was successful.
     if r['success']:
