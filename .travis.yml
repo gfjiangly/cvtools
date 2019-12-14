@@ -1,29 +1,23 @@
 dist: xenial
 sudo: required
 language: python
-
 install:
 - rm -rf .eggs && pip install -e .
-
 cache:
   pip: true
-
 python:
 - '3.5'
 - '3.6'
 - '3.7'
-
 script: pytest
-
 deploy:
   provider: pypi
-  user: jiang.g.f
-  password:
-    secure: xRgjwgJhAOmtDqgsyOJn7125yYC+WvdxSyOfJVcQbRomS+Gbl0R9BDBikhfKlQxMHYZ5w8rO6cZXWU8n+R4ljVgGvuUqI89GceecVQHZmewTMogr0vG7EFKESfJYBtqtWDX1eH243SQmsn/RjZzkwwWvn/hNPNefB3x2l3Vh/m82IKCYwNv9VzzcL1a2l5NZtUN/eoOB842cIxmYdqbuC2+Y3KFvpaPIKdvHNn3Xdreykh3O6vwhjMVCaNhq1jAD74Q9uH6QJfmEhGawAmeq9lDVNKR8FYbc2mDi1mx5jjv0urTuSVhkG705b7Af1GUN57xwzf2Qwf7WaQZrZhXkwbxb/XKH9m7jnxtMUoGvTklJzpLVHcCJIUutShT9PghZ3hUVxkamom4if8fjMFx9d5A6iJ4+3QUxkswBn8nFwXDFOjsFObMuuJ9zGE/omc6a8Yp98V5HEEM3Os7eH/38H2SOB4sTxuCdKd6UiW0ThnH/FcHNhBhw4Qjy+lTQi5L1TR9UMT26W6aJ/E4yjY+LRGiZdK+WAugWlqmFCoJVhMjJ3PNFH6lf0QnZtapVk9fVAOdId5HOrqQun/hSPBjAIBkPVOMVIu0vrTAYjAdH0H44S5I6kzd/VSvdlqHmUUeEF/8z5qgDjbCz+qP5CP3UdubW70yZ3o3PVQ6senXBgA4=
-  true:
-    branch: master
+  user: __token__
+  skip_existing: true
+  on:
     tags: true
-    python: '3.6'
     distributions: sdist bdist_wheel
     skip_cleanup: true
     skip_upload_docs: true
+  password:
+    secure: bPHv3YdwV2ojRlrj/xwa0Og79+LfKGK+QSIvl4gYJd+V5UohYnqgJNepeiyvaKaYjiK1jtE4Uq7DdDleTXkJKhLpHY0eMLXGxEfJwyHtyXmqvecqACylEjLCJRmACpbYzNE31SJfUBNrqQIvG1YlmcEUoBf4JAgSSWCAuRGR8Zn86ioi5gVm/4LaOGGyvUgccxYLdmOjGm7N+4U14R2qGnDTKXLHFUwZ9icg4KoBMPiZo395GMWLoCsA5vVHbKAy7tcEUwMIRp6i4+BwFLzgxMFIqVPHegWUYnvX4MwfeCPasHcRXbBfD58/V8VFLh5OQDNZ1fDO1xfwx0xRJCBoaJqTYqmDuJCVItSSBWl9cN2xgCidHyWgYBlLaJZqa8fVZSrZ6zowHQvbBWYKI29A0eyLWbfr+ROzO1UuqjY870nNNl2XsMJSESvWv7M20Giu7HWUQm1YNTNP2Pi/20OrDDPAYCUQiC5UfiEZQOVr8o7ICU5AEP1SpKL+DbVHmv7t03ZXGGySN6At3sE023G3tt0B8/5wc/sL7bcJaQM28vimR0TE1G1dpv5RKwo5U1HhwqIzws0QOLbY+hdEeLohdshTxi4dfiCDRSkGn9ttpFq9c3cUkiG/l3h4n3QBY+zhgUxMXae04XBqh1qNkq5/xQT+fcHXkL0zMHgQwJLFVjA=

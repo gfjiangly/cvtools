@@ -28,6 +28,7 @@ install_requires = [
 
 
 def readme():
+    # PyPi默认支持的是rst格式描述，需添加type指定md格式
     with open('README.md', encoding='utf-8') as f:
         content = f.read()
     return content
