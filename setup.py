@@ -48,6 +48,22 @@ setup(
     name='cvtoolss',
     version=get_version(),
     description='Computer Vision Foundation Utilities',
+    long_description="""cvtools is a Python toolkit mainly used in the field of 
+    computer vision. In the process of implementing and training the CV model, 
+    some common code unrelated to the core was stripped out to form this library.
+    
+    It provides the following functions:
+       
+       - Data set format conversion (voc-> coco, dota-> coco, etc.)
+       - Data augmentation (such as rotation, random cropping, 
+            color transformation, etc.)
+       - Data label analysis (such as statistics, number of instances, 
+            proportion, distribution, etc.)
+       - Evaluation of model output results
+       - Common input and output APIs
+       - Some useful functions (such as visualizing model output, 
+            calculating IoU, etc.)
+    """,
     keywords='computer vision',
     packages=find_packages(),
     classifiers=[
