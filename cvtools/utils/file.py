@@ -177,9 +177,14 @@ def check_rept(file):
 
 
 def makedirs(path):
-    """从路径中创建文件夹，可创建多层。
-    如果仅是文件名，则无须创建，返回False；
-    如果是已存在文件或路径，则无须创建，返回False"""
+    """对os.makedirs进行扩展
+
+    从路径中创建文件夹，可创建多层。如果仅是文件名，则无须创建，返回False；
+    如果是已存在文件或路径，则无须创建，返回False
+
+    Args:
+        path: 路径，可包含文件名。纯路径最后一个字符需要是os.sep
+    """
     if path is None or path == '':  # 空
         return False
     if osp.isfile(path):    # 是文件并且已存在
