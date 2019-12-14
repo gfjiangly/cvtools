@@ -168,8 +168,8 @@ def rotate_rects(rects, centers, angle):
                        rects[:, 0:1], rects[:, 3:4]))
     coors = rects.reshape(-1, 2)
 
-    cosA = np.tile(np.cos(np.pi / 180. * angle), (4, 1))
-    sinA = np.tile(np.sin(np.pi / 180. * angle), (4, 1))
+    cosA = np.tile(np.cos(np.pi / 180. * angle), (4, 1)).reshape(-1, 1)
+    sinA = np.tile(np.sin(np.pi / 180. * angle), (4, 1)).reshape(-1, 1)
 
     x, y = coors[:, 0:1], coors[:, 1:2]
     x0, y0 = np.tile(centers[:, 0:1], (4, 1)), np.tile(centers[:, 1:2], (4, 1))
@@ -191,15 +191,19 @@ def xywha_to_x1y1x2y2x3y3x4y4(xywha):
         raise TypeError('Argument xywha must be a list, tuple, or numpy array.')
 
 
-def get_minAreaRect(cnt):
-    """返回：（中心(x,y), (宽,高), 旋转角度）"""
+def get_min_area_rect(cnt):
+    """包装cv.minAreaRect
+
+    Args:
+        cnt: (np.ndarray): [x1, y1, x2, y2, x3, y3, x4, y4, ...]
+
+    Returns:
+        xywha：((x,y), (w,h), a), (x,y) is Oriented Bounding Box（OBB）'s center point,
+        a is orientation, which range is [-90, 0)
+    """
     assert isinstance(cnt, np.ndarray)
     cnt = cnt.reshape(-1, 2)
     # the clockwise output convex hull in the Cartesian coordinate system
     cnt_hull = cv.convexHull(cnt.astype(np.float32), clockwise=False)
     xywha = cv.minAreaRect(cnt_hull)
     return xywha
-
-
-if __name__ == '__main__':
-    pass
