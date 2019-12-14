@@ -5,6 +5,6 @@ matplotlib
 pillow
 tqdm
 # scikit-learn>=0.21
-# mmcv>=0.2.13
+mmcv>=0.2.13
 shapely>=1.6.4
 terminaltables
