@@ -84,27 +84,29 @@ def coco_classes():
 
 def dota_classes():
     return [
-        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
-        'soccer-ball-field', 'basketball-court', 'ground-track-field', 'small-vehicle',
-        'harbor',  'baseball-diamond', 'tennis-court', 'roundabout', 'storage-tank'
+        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane',
+        'ship', 'soccer-ball-field', 'basketball-court', 'ground-track-field',
+        'small-vehicle', 'harbor',  'baseball-diamond', 'tennis-court',
+        'roundabout', 'storage-tank'
     ]
 
 
 def dota2_classes():
     return [
-        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
-        'soccer-ball-field', 'basketball-court', 'ground-track-field', 'small-vehicle',
-        'harbor',  'baseball-diamond', 'tennis-court', 'roundabout', 'storage-tank',
-        'container-crane'
+        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane',
+        'ship', 'soccer-ball-field', 'basketball-court', 'ground-track-field',
+        'small-vehicle', 'harbor',  'baseball-diamond', 'tennis-court',
+        'roundabout', 'storage-tank', 'container-crane'
     ]
 
 
 def rscup_classes():
     return [
-        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane', 'ship',
-        'soccer-ball-field', 'basketball-court', 'airport', 'container-crane',
-        'ground-track-field', 'small-vehicle', 'harbor', 'baseball-diamond',
-        'tennis-court', 'roundabout', 'storage-tank', 'helipad'
+        'large-vehicle', 'swimming-pool', 'helicopter', 'bridge', 'plane',
+        'ship', 'soccer-ball-field', 'basketball-court', 'airport',
+        'container-crane', 'ground-track-field', 'small-vehicle', 'harbor',
+        'baseball-diamond', 'tennis-court', 'roundabout', 'storage-tank',
+        'helipad'
     ]
 
 
