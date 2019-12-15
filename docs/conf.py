@@ -14,7 +14,17 @@
 #
 import os
 import sys
+import mock
+
 sys.path.insert(0, os.path.abspath('..'))
+
+MOCK_MODULES = [
+    'numpy', 'opencv-python', 'matplotlib', 'matplotlib.pyplot', 'pillow',
+    'tqdm', 'mmcv', 'shapely', 'terminaltables'
+]
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 version_file = '../cvtools/version.py'
 with open(version_file, 'r') as f:
