@@ -3,6 +3,7 @@
 # time     : 2019/7/10 16:11
 # e-mail   : jgf0719@foxmail.com
 # software : PyCharm
+from .crop import *
 from .augmentations import Compose
 from .augmentations import ToAbsoluteCoords, ToPercentCoords, ConvertFromInts
 from .augmentations import (RandomSaturation, RandomHue, RandomLightingNoise,
