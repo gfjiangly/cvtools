@@ -2,7 +2,7 @@
 # @Time    : 2019/11/17 14:29
 # @Author  : gfjiang
 # @Site    : 
-# @File    : test_RandomRotate.py
+# @File    : test_rotate.py
 # @Software: PyCharm
 import os.path as osp
 import cv2.cv2 as cv
