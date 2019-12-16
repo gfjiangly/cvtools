@@ -36,6 +36,10 @@ class COCOAnalysis(object):
     def stats_objs_per_cat(self, to_file='objs_per_cat_data.json'):
         self.size_analysis.stats_objs_per_cat(to_file=to_file)
 
+    def get_weights_for_balanced_classes(self, to_file='weighted_samples.pkl'):
+        weights = self.size_analysis.get_weights_for_balanced_classes(to_file)
+        return weights
+
     # TODO: plan to fix
     def cluster_analysis(self,
                          save_root,
@@ -112,23 +116,53 @@ class COCOAnalysis(object):
                 osp.join(save_root, 'cluster_{}.json'.format(cat_name))
             )
 
+    def read_img_or_crop(self, entry):
+        image_name = entry['file_name']
+        image_file = osp.join(self.img_prefix, image_name)
+        try:
+            img = cvtools.imread(image_file)
+        except FileNotFoundError:
+            print('image {} is not found!'.format(image_file))
+            img = None
+        image_name = osp.splitext(image_name)[0]
+        if 'crop' in entry:
+            img = img[entry['crop'][1]:entry['crop'][3]+1,
+                  entry['crop'][0]:entry['crop'][2]+1]
+            image_name = '_'.join([image_name] + list(map(str, entry['crop'])))
+        return img, image_name
+
+    def vis_objs(self, img, objs, vis='bbox', box_format='x1y1wh'):
+        for obj in objs:
+            vis_obj = []
+            if 'ignore' in obj and obj['ignore'] == 1: continue
+            if vis in obj: vis_obj = obj[vis]
+            class_name = self.COCO.cats[obj['category_id']]['name'] \
+                if 'category_id' in obj else ''
+            img = cvtools.draw_boxes_texts(
+                img, vis_obj, class_name, box_format=box_format)
+        return img
+
     def vis_instances(self,
                       save_root,
                       vis='bbox',   # or segm
-                      box_format='x1y1wh',
-                      by_cat=False):
+                      vis_cats=None,
+                      box_format='x1y1wh'):
         """Visualise bbox and polygon in annotation.
+
+        包含某一类的图片上所有类别均会被绘制。
 
         Args:
             save_root (str): path for saving image.
             vis (str): 'bbox' or 'segmentation'
+            vis_cats (list): categories to be visualized
             box_format (str): 'x1y1wh' or 'polygon'
-            by_cat (bool): if true, visualization by class
         """
         assert vis in ('bbox', 'segmentation')
         assert box_format in ('x1y1wh', 'polygon')
-        if by_cat:
-            self._vis_instances_by_cat(save_root, vis, box_format)
+        if vis_cats is not None:
+            self._vis_instances_by_cat(
+                save_root, vis=vis, vis_cats=vis_cats, box_format=box_format)
+            return
         image_ids = self.COCO.getImgIds()
         image_ids.sort()
         if cvtools._DEBUG:
@@ -140,41 +174,16 @@ class COCOAnalysis(object):
         for i, entry in enumerate(roidb):
             print('Visualize image %d of %d: %s' %
                   (i, len(roidb), entry['file_name']))
-            image_name = entry['file_name']
-            image_file = osp.join(self.img_prefix, image_name)
-            try:
-                img = cvtools.imread(image_file)
-            except FileNotFoundError:
-                print('image {} is not found!'.format(image_file))
-                continue
-            image_name = osp.splitext(image_name)[0]
-            if 'crop' in entry:
-                img = img[entry['crop'][1]:entry['crop'][3],
-                      entry['crop'][0]:entry['crop'][2]]
-                image_name = '_'.join([image_name] +
-                                      list(map(str, entry['crop'])))
+            img, image_name = self.read_img_or_crop(entry)
             if img is None:
-                print('{} is None.'.format(image_file))
+                print('{} is None.'.format(image_name))
                 continue
             ann_ids = self.COCO.getAnnIds(imgIds=entry['id'],
                                           iscrowd=None)
             objs = self.COCO.loadAnns(ann_ids)
-            if len(objs) == 0:
-                continue
+            if len(objs) == 0: continue
             # Sanitize bboxes -- some are invalid
-            for obj in objs:
-                vis_obj = []
-                if 'ignore' in obj and obj['ignore'] == 1:
-                    continue
-                if vis in obj:
-                    vis_obj = obj[vis]
-                class_name = self.COCO.cats[obj['category_id']]['name'] \
-                    if 'category_id' in obj else ''
-                img = cvtools.draw_boxes_texts(img,
-                                               vis_obj,
-                                               class_name,
-                                               box_format=box_format)
-            # save in jpg format for saving storage
+            img = self.vis_objs(img, objs, vis=vis, box_format=box_format)
             cvtools.imwrite(img, osp.join(save_root, image_name + '.jpg'))
 
     def _vis_instances_by_cat(self,
@@ -182,6 +191,16 @@ class COCOAnalysis(object):
                               vis_cats=None,
                               vis='bbox',
                               box_format='x1y1wh'):
+        """Visualise bbox and polygon in annotation by categories.
+
+        包含某一类的图片上所有类别均会被绘制。
+
+        Args:
+            save_root (str): path for saving image.
+            vis (str): 'bbox' or 'segmentation'
+            vis_cats (list): categories to be visualized
+            box_format (str): 'x1y1wh' or 'polygon'
+        """
         catImgs = copy.deepcopy(self.COCO.catToImgs)
         catImgs = {cat: set(catImgs[cat]) for cat in catImgs}
         for cat_id, image_ids in catImgs.items():
@@ -189,55 +208,19 @@ class COCOAnalysis(object):
             if vis_cats is not None and cat_name not in vis_cats:
                 continue
             print('Visualize %s' % cat_name)
+            roidb = self.COCO.loadImgs(image_ids)   # 不会修改原始数据
             if cvtools._DEBUG:
-                roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))[:10]
-            else:
-                roidb = copy.deepcopy(self.COCO.loadImgs(image_ids))
+                roidb = roidb[:10]
             for i, entry in enumerate(roidb):
                 print('Visualize image %d of %d: %s' %
                       (i, len(roidb), entry['file_name']))
-                image_name = entry['file_name']
-                image_file = osp.join(self.img_prefix, image_name)
-                img = cvtools.imread(image_file)  # support chinese
-                image_name = osp.splitext(image_name)[0]
-                if 'crop' in entry:
-                    img = img[entry['crop'][1]:entry['crop'][3],
-                          entry['crop'][0]:entry['crop'][2]]
-                    image_name = '_'.join([image_name] +
-                                          list(map(str, entry['crop'])))
+                img, image_name = self.read_img_or_crop(entry)
                 if img is None:
-                    print('{} is None.'.format(image_file))
+                    print('{} is None.'.format(image_name))
                     continue
                 ann_ids = self.COCO.getAnnIds(imgIds=entry['id'], iscrowd=None)
                 objs = self.COCO.loadAnns(ann_ids)
-                for obj in objs:
-                    if obj['category_id'] != cat_id:
-                        continue
-                    if 'ignore' in obj and obj['ignore'] == 1:
-                        continue
-                    vis_obj = []
-                    if vis in obj:
-                        vis_obj = obj[vis]
-                    class_name = [cat_name if 'category_id' in obj else '']
-                    img = cvtools.draw_boxes_texts(img,
-                                                   vis_obj,
-                                                   class_name,
-                                                   box_format=box_format)
+                img = self.vis_objs(img, objs, vis=vis, box_format=box_format)
                 # save in jpg format for saving storage
-                cvtools.imwrite(img, osp.join(save_root, cat_name, image_name + '.jpg'))
-
-
-if __name__ == '__main__':
-    img_prefix = 'D:/data/rssrai2019_object_detection/train/images'
-    ann_file = '../label_convert/dota/train_dota_x1y1wh_polygen.json'
-    coco_analysis = COCOAnalysis(img_prefix, ann_file)
-    coco_analysis.stats_objs_per_img('dota/num_per_img.json')
-    coco_analysis.stats_objs_per_cat('dota/class_distribution/class_distribution.txt')
-    coco_analysis.cluster_analysis('dota/bbox_distribution/',
-                                   name_clusters=('area',),
-                                   n_clusters=(18,))
-    coco_analysis.vis_instances('dota/vis_dota_whole/',
-                                vis='segmentation',
-                                box_format='x1y1x2y2x3y3x4y4')
-
-
+                cvtools.imwrite(
+                    img, osp.join(save_root, cat_name, image_name + '.jpg'))
