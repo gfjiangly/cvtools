@@ -36,6 +36,7 @@ class COCOAnalysis(object):
     def stats_objs_per_cat(self, to_file='objs_per_cat_data.json'):
         self.size_analysis.stats_objs_per_cat(to_file=to_file)
 
+    # TODO: plan to fix
     def cluster_analysis(self,
                          save_root,
                          name_clusters=('bbox', ),
@@ -102,10 +103,14 @@ class COCOAnalysis(object):
                 if len(cluster_value) < n_clusters[i]:
                     continue
                 centers = cvtools.k_means_cluster(
-                    np.array(cluster_value).reshape(-1, 1), n_clusters=n_clusters[i])
-                cluster_results[cluster_name][cat_name].append(list(centers.reshape(-1)))
-            cvtools.save_json(cluster_results,
-                              osp.join(save_root, 'cluster_{}.json'.format(cat_name)))
+                    np.array(cluster_value).reshape(-1, 1),
+                    n_clusters=n_clusters[i])
+                cluster_results[cluster_name][cat_name].append(
+                    list(centers.reshape(-1)))
+            cvtools.save_json(
+                cluster_results,
+                osp.join(save_root, 'cluster_{}.json'.format(cat_name))
+            )
 
     def vis_instances(self,
                       save_root,
@@ -146,7 +151,8 @@ class COCOAnalysis(object):
             if 'crop' in entry:
                 img = img[entry['crop'][1]:entry['crop'][3],
                       entry['crop'][0]:entry['crop'][2]]
-                image_name = '_'.join([image_name] + list(map(str, entry['crop'])))
+                image_name = '_'.join([image_name] +
+                                      list(map(str, entry['crop'])))
             if img is None:
                 print('{} is None.'.format(image_file))
                 continue
