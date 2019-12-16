@@ -80,15 +80,12 @@ class DOTA2COCO(object):
                 image_name = file.split('_')[0] + '.png'
             image_file = osp.join(self.image_root, image_name)
             try:
-                # self.run_timer.tic()
                 "PIL: Open an image file, without loading the raster data"
                 im = Image.open(image_file)
-                # im = cv2.imdecode(np.fromfile(image_name, dtype=np.uint8), cv2.IMREAD_COLOR)
-                # self.run_timer.toc(average=False)
                 if im is None:
-                    print('Waring: !!!can\'t read %s, continue this image' % image_file)
+                    print('Waring: !!!can\'t read %s, continue this image'
+                          % image_file)
                     continue
-                # height, width, _ = im.shape
                 width, height = im.size
             except (FileNotFoundError, Image.DecompressionBombError) as e:
                 print(e)
@@ -124,7 +121,8 @@ class DOTA2COCO(object):
                 polygon = list(map(float, [item.strip() for item in line[:8]]))
                 # prepare for Polygon class input
                 a = np.array(polygon).reshape(4, 2)
-                # the clockwise output convex hull in the Cartesian coordinate system
+                # the clockwise output convex hull in the Cartesian coordinate
+                # system
                 a_hull = cv.convexHull(a.astype(np.float32), clockwise=False)
 
                 if self.box_form == 'x1y1wh':
@@ -138,7 +136,8 @@ class DOTA2COCO(object):
                     area = cv.contourArea(a_hull)
                     box = list(a_hull.reshape(-1).astype(np.float))
                 else:
-                    raise TypeError("not support {} box format!".format(self.box_form))
+                    raise TypeError("not support {} box format!".format(
+                        self.box_form))
 
                 if not self.check_box(box, width, height):
                     print('{}: box {} out of the image {}x{}'.format(
@@ -178,11 +177,3 @@ class DOTA2COCO(object):
         with open(to_file, 'w') as f:
             json.dump(self.coco_dataset, f)
         print('!save {} finished'.format(to_file))
-
-
-if __name__ == '__main__':
-    label_root = '/media/data/DOTA/train/labelTxt/'
-    image_root = '/media/data/DOTA/train/images/'
-    dota_to_coco = DOTA2COCO(label_root, image_root)
-    dota_to_coco.convert()
-    dota_to_coco.save_json('/media/data/DOTA/json/train_dota_x1y1wh_polygen.json')
