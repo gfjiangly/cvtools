@@ -14,14 +14,14 @@ current_path = osp.dirname(__file__)
 
 
 def test_RandomRotate():
-    image_file = 'P2305'
+    image_file = 'P0126'
     image = cv.imread(
-        osp.join(current_path, 'data/rscup/images/{}.png'.format(image_file))
+        osp.join(current_path, 'data/DOTA/images/{}.png'.format(image_file))
     )
     labels = cvtools.readlines(
-        osp.join(current_path, 'data/rscup/labelTxt/{}.txt'.format(image_file))
+        osp.join(current_path, 'data/DOTA/labelTxt/{}.txt'.format(image_file))
     )
-    labels = labels[4:]
+    labels = labels[2:]
     bboxes = [list(map(float, line.split()[:8]))
               for line in labels if len(line) > 1]
     draw_img = cvtools.draw_boxes_texts(
