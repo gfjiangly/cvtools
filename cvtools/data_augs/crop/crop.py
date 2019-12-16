@@ -20,7 +20,6 @@ class CropLargeImages(Crop):
         self.dataset = dataset
         self.crop_method = crop_method
         self.ovover_strict = over_strict
-        self.img_boxes = []
         self.crops = []
         self.cat_id_to_name = {
             cat['id']: cat['name']
@@ -29,6 +28,11 @@ class CropLargeImages(Crop):
         self.crop_for_protected = CropImageProtected(strict=over_strict)
 
     def crop_for_train(self, over_samples=None):
+        """训练集裁剪
+
+        Args:
+            over_samples (dict): {类别: 重采样次数， ...}
+        """
         for i in range(len(self.dataset)):
             data = self.dataset[i]
             # 索引或迭代dataset必须提供包含image字段和anns字段信息
@@ -40,7 +44,8 @@ class CropLargeImages(Crop):
 
             # 过采样扩展，对少样本类别过采样
             if over_samples is not None:
-                self.over_sample(img, anns, over_samples)
+                add_croped = self.over_sample(img, anns, over_samples)
+                cropped.update(add_croped)
 
             self.crops.append(cropped)
             print('crop image %d of %d: %s' %
@@ -74,3 +79,4 @@ class CropLargeImages(Crop):
 
     def save(self, to_file):
         self.dataset.save(self.crops, to_file=to_file)
+        self.crops = []
