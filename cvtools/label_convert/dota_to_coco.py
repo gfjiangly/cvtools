@@ -46,10 +46,9 @@ class DOTA2COCO(object):
             self.files = self.files[:10]
         self.lines = []
         if isinstance(classes, str):
-            self.classes = cvtools.read_files_to_list(classes)
+            self.cls_map = cvtools.read_key_value(classes)
         else:
-            self.classes = classes
-        self.cls_map = {name: i + 1 for i, name in enumerate(self.classes)}
+            self.cls_map = {name: i + 1 for i, name in enumerate(classes)}
         self.coco_dataset = {
             "info": {
                 "description": "This is stable 1.0 version of the DOTA.",
@@ -153,7 +152,8 @@ class DOTA2COCO(object):
                     self.coco_dataset['annotations'].append({
                         'area': area,
                         'bbox': box,
-                        'category_id': int(self.cls_map[cat]),  # 0 for backgroud
+                        # 0 for background
+                        'category_id': int(self.cls_map[cat]),
                         'id': self.annID,
                         'image_id': self.imageID,
                         'iscrowd': 0,
