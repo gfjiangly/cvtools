@@ -1,0 +1,15 @@
+large-vehicle: 1
+swimming-pool: 2
+helicopter: 3
+bridge: 4
+plane: 5
+ship: 6
+soccer-ball-field: 7
+basketball-court: 8
+ground-track-field: 9
+small-vehicle: 10
+harbor: 11
+baseball-diamond: 12
+tennis-court: 13
+roundabout: 14
+storage-tank: 15
