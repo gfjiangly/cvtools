@@ -11,8 +11,9 @@
 .. toctree::
    :maxdepth: 2
 
-   label_convert.md
-   label_analysis.md
+   label_convert
+   label_analysis
+   data_augs
    api
 
 
