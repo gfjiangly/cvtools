@@ -21,7 +21,9 @@ cvtools是主要用于计算机视觉领域的Python工具包。在实现和训�
 
     pip install cvtoolss
 
-注意这里多一个s，cvtools这个名字在PyPi中已被占用。注意：PyPi上的包可能不是最新的，建议从源码安装。
+
+.. note::
+    这里多一个s，cvtools这个名字在PyPi中已被占用。PyPi上的包可能不是最新的，建议从源码安装。
 
 从源码安装
 

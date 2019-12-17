@@ -90,7 +90,7 @@ coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
 save = 'dota/vis_dota_whole/'
 coco_analysis.vis_instances(save, 
                             vis='segmentation', 
-                            box_format='x1y1x2y2x3y3x4y4')
+                            box_format='polygon')
 
 # Size distribution analysis for each category
 save = 'size_per_cat_data.json'
