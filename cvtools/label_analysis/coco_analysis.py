@@ -146,6 +146,7 @@ class COCOAnalysis(object):
                       save_root,
                       vis='bbox',   # or segm
                       vis_cats=None,
+                      output_by_cat=False,
                       box_format='x1y1wh'):
         """Visualise bbox and polygon in annotation.
 
@@ -155,11 +156,12 @@ class COCOAnalysis(object):
             save_root (str): path for saving image.
             vis (str): 'bbox' or 'segmentation'
             vis_cats (list): categories to be visualized
+            output_by_cat (bool): output visual images by category.
             box_format (str): 'x1y1wh' or 'polygon'
         """
         assert vis in ('bbox', 'segmentation')
         assert box_format in ('x1y1wh', 'polygon')
-        if vis_cats is not None:
+        if vis_cats is not None or output_by_cat:
             self._vis_instances_by_cat(
                 save_root, vis=vis, vis_cats=vis_cats, box_format=box_format)
             return
