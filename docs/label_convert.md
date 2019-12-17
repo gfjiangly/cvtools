@@ -19,6 +19,20 @@ voc_to_coco.save_json(to_file='voc/{}.json'.format(mode))
 
 ```
 
+### VOC转DarkNet
+
+```python
+import cvtools
+
+
+voc_to_darknet = cvtools.VOC2DarkNet(
+    current_path + '/data/VOC',
+    mode='trainval',
+    use_xml_name=True,
+    read_test=True
+)
+voc_to_darknet.convert(save_root=current_path + '/out/darknet')
+```
 
 ### DOTA转COCO
 
