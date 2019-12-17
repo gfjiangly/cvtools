@@ -21,9 +21,6 @@ class VOC2DarkNet(object):
             self.classes = cvtools.read_files_to_list(classes)
         else:
             self.classes = classes
-        self.label_path = osp.join(self.voc_root, 'labels')
-        cvtools.makedirs(self.label_path)
-
         file = osp.join(voc_root, 'ImageSets/Main/{}.txt'.format(mode))
         self.imgs = cvtools.read_files_to_list(file)
         self.img_paths = [
@@ -34,8 +31,12 @@ class VOC2DarkNet(object):
             osp.join(voc_root, 'Annotations/{}.xml'.format(img_name))
             for img_name in self.imgs]
 
-    def convert(self):
+    def convert(self, save_root=None):
         valid_imgs = []
+        if save_root is None:
+            save_root = self.voc_root
+        label_path = osp.join(save_root, 'labels')
+        cvtools.makedirs(label_path)
         for index, xml_path in enumerate(self.xml_paths):
             print('parsing xml {} of {}: {}.xml'.format(
                 index+1, len(self.imgs), self.imgs[index]))
@@ -63,7 +64,7 @@ class VOC2DarkNet(object):
                 print('Image {} has no object'.format(img_path))
                 continue
 
-            save_file = osp.join(self.label_path, '{}.txt'.format(self.imgs[index]))
+            save_file = osp.join(label_path, '{}.txt'.format(self.imgs[index]))
             save_context = []
             valid_imgs.append(img_path)
 
@@ -81,9 +82,11 @@ class VOC2DarkNet(object):
                     float(bnd_box.find('ymax').text)
                 ]
                 bb = self.convert_box((w, h), b)
-                save_context.append(str(cls_id) + " " + " ".join([str(a) for a in bb]))
+                save_context.append(
+                    str(cls_id) + " " + " ".join([str(a) for a in bb]))
             cvtools.write_list_to_file(save_context, save_file)
-        cvtools.write_list_to_file(valid_imgs, osp.join(self.voc_root, 'darknet_imglist.txt'))
+        cvtools.write_list_to_file(
+            valid_imgs, osp.join(save_root, 'darknet_imglist.txt'))
 
     def convert_box(self, size, box):
         dw = 1./(size[0])
@@ -127,15 +130,3 @@ class VOC2DarkNet(object):
                     print('image {} is None'.format(img_path))
                     return None
         return img_path
-
-
-if __name__ == '__main__':
-    mode = 'trainval'
-    root = 'D:/data/hat_detect/hat_V2.0'
-    voc_to_darknet = VOC2DarkNet(root,
-                                 mode=mode,
-                                 classes=['head', 'hat'],
-                                 use_xml_name=True,
-                                 read_test=False)
-    voc_to_darknet.convert()
-
