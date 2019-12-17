@@ -6,8 +6,8 @@
 import json
 import numpy as np
 
-from .file import read_files_to_list
-from .file import readlines
+from cvtools.file_io.read import read_files_to_list
+from cvtools.file_io.read import readlines
 
 
 # 读取虹软不完全格式化数据进list，测试通过
@@ -57,8 +57,10 @@ def read_yuncong_detect_file(file, num_class):
                     boxes_for_one_image.append(list(map(float, line.split())))
                 boxes_for_one_image = np.array(boxes_for_one_image)
                 for class_index in range(num_class):
-                    boxes_for_one_image_one_class = boxes_for_one_image[
-                        boxes_for_one_image[:, 4].copy().astype(np.int) == class_index][:, [0, 1, 2, 3, 5]]
+                    ids = boxes_for_one_image[:, 4].copy().astype(
+                        np.int) == class_index
+                    boxes_for_one_image_one_class = \
+                        boxes_for_one_image[ids][:, [0, 1, 2, 3, 5]]
                     dets_yolo[class_index].append(boxes_for_one_image_one_class)
                 last_line = 'box'
             if last_line is 'box':
