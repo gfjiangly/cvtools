@@ -9,9 +9,9 @@ import os
 from tqdm import tqdm
 from PIL import Image
 
-from cvtools.utils.file import read_files_to_list
+from cvtools.file_io.read import read_files_to_list
 from cvtools.utils.timer import get_time_str
-from cvtools.utils.file import read_key_value
+from cvtools.file_io.read import read_key_value
 
 
 class Jiang2COCO(object):

@@ -6,7 +6,7 @@
 
 import os
 from tqdm import tqdm
-from cvtools.utils.file import read_files_to_list, read_file_to_list
+from cvtools.file_io.read import read_files_to_list, read_file_to_list
 
 
 def check_annots(file, save):

@@ -5,8 +5,7 @@
 # @File    : merge_coco.py
 # @Software: PyCharm
 import copy
-
-from cvtools.utils.file import load_json, save_json
+import cvtools
 
 
 class MergeCOCO(object):
@@ -24,7 +23,7 @@ class MergeCOCO(object):
         if isinstance(self.files[0], dict):
             self.merge_coco = copy.deepcopy(self.files[0])
         else:
-            self.merge_coco = load_json(self.files[0])
+            self.merge_coco = cvtools.load_json(self.files[0])
         self.img_ids = [img_info['id']
                         for img_info in self.merge_coco['images']]
         self.ann_ids = [img_info['id']
@@ -50,7 +49,7 @@ class MergeCOCO(object):
     def merge(self, to_file=None):
         for dataset in self.files[1:]:
             if not isinstance(dataset, dict):
-                dataset = load_json(dataset)
+                dataset = cvtools.load_json(dataset)
             self.update_img_ann_ids(
                 dataset['images'], dataset['annotations'])
         if to_file:
@@ -58,7 +57,7 @@ class MergeCOCO(object):
         return self.merge_coco
 
     def save(self, save='merge_coco.json'):
-        save_json(self.merge_coco, save)
+        cvtools.save_json(self.merge_coco, save)
 
 
 if __name__ == '__main__':

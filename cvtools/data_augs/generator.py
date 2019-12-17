@@ -12,7 +12,7 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 import cvtools
-from cvtools.utils.file import read_files_to_list, makedirs
+from cvtools.file_io.read import read_files_to_list
 from cvtools.utils.image import draw_rect_test_labels
 
 
@@ -49,7 +49,7 @@ def augment_images():
     dataset = read_files_to_list(root, data_list)
     transfer = DataAugmentation()
     save_path = 'generate_image2/'
-    makedirs(save_path)
+    cvtools.makedirs(save_path)
     annts_lines = ''
 
     # pool = Pool(processes=3)  # 创建进程池，指定最大并发进程数
