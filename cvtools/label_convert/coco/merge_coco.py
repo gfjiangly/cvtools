@@ -57,7 +57,7 @@ class MergeCOCO(object):
         return self.merge_coco
 
     def save(self, save='merge_coco.json'):
-        cvtools.save_json(self.merge_coco, save)
+        cvtools.dump_json(self.merge_coco, save)
 
 
 if __name__ == '__main__':

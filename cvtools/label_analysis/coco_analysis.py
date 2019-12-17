@@ -111,7 +111,7 @@ class COCOAnalysis(object):
                     n_clusters=n_clusters[i])
                 cluster_results[cluster_name][cat_name].append(
                     list(centers.reshape(-1)))
-            cvtools.save_json(
+            cvtools.dump_json(
                 cluster_results,
                 osp.join(save_root, 'cluster_{}.json'.format(cat_name))
             )

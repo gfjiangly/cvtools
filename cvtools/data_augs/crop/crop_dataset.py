@@ -84,7 +84,7 @@ class CocoDatasetForCrop(CropDataset):
                 image_id += 1
         self.crop_dataset['images'] = new_images
         self.crop_dataset['annotations'] = new_annotations
-        cvtools.save_json(self.crop_dataset, to_file)
+        cvtools.dump_json(self.crop_dataset, to_file)
 
     def trans_ann(self, ann, img_box):
         segm = np.array(ann['segmentation'][0]).reshape(-1, 2)

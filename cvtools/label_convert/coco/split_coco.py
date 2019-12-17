@@ -39,8 +39,8 @@ class SplitDataset(object):
 
         if to_file:
             path, name = osp.split(to_file)
-            cvtools.save_json(train, to_file=osp.join(path, 'train_'+name))
-            cvtools.save_json(val, to_file=osp.join(path, 'val_'+name))
+            cvtools.dump_json(train, to_file=osp.join(path, 'train_'+name))
+            cvtools.dump_json(val, to_file=osp.join(path, 'val_'+name))
         return val, train
 
     def split_cats(self):
@@ -66,7 +66,7 @@ class SplitDataset(object):
 
     def save_cat_datasets(self, to_file):
         for dataset in self.catToDatasets:
-            cvtools.save_json(
+            cvtools.dump_json(
                 dataset,
                 to_file=to_file.format(
                     dataset['categories'][0]['name'])

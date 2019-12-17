@@ -73,7 +73,7 @@ class SizeAnalysis(object):
             data_dict['large'] = len(
                 [size for size in sizes if size > size_split2])
             g2_data.append(data_dict)
-        cvtools.save_json(g2_data, to_file)
+        cvtools.dump_json(g2_data, to_file)
 
     def stats_objs_per_img(self, to_file='stats_num.json'):
         total_anns = 0
@@ -86,7 +86,7 @@ class SizeAnalysis(object):
             imgToNum[cat_name] = len(ann_ids) / float(len(imgs))
         imgToNum['total'] = total_anns / float(len(self.coco.imgs))
         print(imgToNum)
-        cvtools.save_json(imgToNum, to_file)
+        cvtools.dump_json(imgToNum, to_file)
 
     def stats_objs_per_cat(self, to_file='objs_per_cat_data.json'):
         cls_to_num = list()
@@ -95,7 +95,7 @@ class SizeAnalysis(object):
             item['name'] = self.coco.cats[cat_id]['name']
             item['value'] = len(self.coco.catToImgs[cat_id])
             cls_to_num.append(item)
-        cvtools.save_json(cls_to_num, to_file=to_file)
+        cvtools.dump_json(cls_to_num, to_file=to_file)
 
     # TODO: to fix
     def get_weights_for_balanced_classes(self, to_file='weighted_samples.pkl'):
