@@ -9,7 +9,8 @@ python:
 - '3.5'
 - '3.6'
 - '3.7'
-script: pytest
+script: coverage run -m pytest
+after_success: codecov
 deploy:
   provider: pypi
   user: __token__
