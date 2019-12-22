@@ -51,6 +51,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
     'recommonmark',
 ]
 
@@ -108,3 +110,7 @@ def setup(app):
     app.add_stylesheet('theme_overrides.css')
     # trigger the run_apidoc
     app.connect('builder-inited', run_apidoc)
+
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = True

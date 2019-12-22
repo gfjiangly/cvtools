@@ -15,6 +15,7 @@
    label_analysis
    data_augs
    file_io
+   utils
    api
 
 
