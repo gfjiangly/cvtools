@@ -45,6 +45,6 @@ jobs:
         file: ./coverage.xml  # optional, Path to the coverage report(s)
         flags: pytest  # optional
         name: codecov-umbrella  # optional
-        yml: ./../../codecov.yml  # optional, Path to codecov.yml config file
+        yml: ./codecov.yml  # optional, Path to codecov.yml config file
         fail_ci_if_error: true  # optional (default = false)
 

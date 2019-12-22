@@ -1,8 +1,0 @@
-[run]
-branch = True
-source = cvtools
-include = */cvtools/*
-omit =
-    */opencv_info.py
-    */version.py
-    */setup.py
