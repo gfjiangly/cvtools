@@ -1,9 +1,10 @@
 cvtools
 =======
 
+ [![Documentation Status](https://readthedocs.org/projects/cvtools/badge/?version=latest)](https://cvtools.readthedocs.io/zh/latest/?badge=latest)
 [![Travis CI Build](https://travis-ci.com/gfjiangly/cvtools.svg?branch=master)](https://travis-ci.com/gfjiangly/cvtools)
+ [![codecov](https://codecov.io/gh/gfjiangly/cvtools/branch/dev/graph/badge.svg)](https://codecov.io/gh/gfjiangly/cvtools)
 [![PyPI - Python Version](https://img.shields.io/pypi/v/cvtoolss)](https://pypi.org/project/cvtoolss)
-[![Documentation Status](https://readthedocs.org/projects/cvtools/badge/?version=latest)](https://cvtools.readthedocs.io/zh/latest/?badge=latest)
 [![GitHub - License](https://img.shields.io/github/license/open-mmlab/mmcv.svg)](https://github.com/gfjiangly/cvtools/blob/master/LICENSE)
 
 Computer Vision Tool Library
