@@ -14,7 +14,7 @@ python:
   - '3.7'
 #script: coverage run -m pytest
 script: python -m pytest --cov=cvtools
-after_success: codecov
+#after_success: codecov
 deploy:
   provider: pypi
   user: __token__
