@@ -3,9 +3,9 @@ sudo: required
 language: python
 install:
   - rm -rf .eggs && pip install -e .
-  - pip install pytest-cov
+#  - pip install pytest-cov
 #  - pip install coverage
-  - pip install codecov
+#  - pip install codecov
 cache:
   pip: true
 python:
@@ -13,8 +13,9 @@ python:
   - '3.6'
   - '3.7'
 #script: coverage run -m pytest
-script: python -m pytest --cov=cvtools
+#script: python -m pytest --cov=cvtools
 #after_success: codecov
+script: pytest
 deploy:
   provider: pypi
   user: __token__
