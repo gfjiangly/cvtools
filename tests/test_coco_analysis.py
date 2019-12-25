@@ -31,3 +31,17 @@ class TestCocoAnalysis(object):
             vis_cats=['large-vehicle', 'ship'],
             box_format='x1y1wh'
         )
+
+    def test_stats(self):
+        img_prefix = current_path + '/data/DOTA/images'
+        ann_file = current_path + '/data/DOTA/dota_x1y1wh_polygon.json'
+        coco_analysis = cvtools.COCOAnalysis(img_prefix, ann_file)
+
+        coco_analysis.stats_size_per_cat(
+            current_path + '/out/dota/analysis/size_per_cat_data.json')
+
+        coco_analysis.stats_objs_per_cat(
+            current_path + '/out/dota/analysis/objs_per_cat_data.json')
+
+        coco_analysis.stats_objs_per_img(
+            current_path + '/out/dota/analysis/stats_num.json.json')
