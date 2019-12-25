@@ -1,4 +1,5 @@
-comment: false
+codecov:
+  branch: stable
 
 coverage:
   status:
