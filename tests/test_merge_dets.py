@@ -47,6 +47,6 @@ def test_MergeCropDetResults():
             dets[cls] = np.array(det)
         det_results.append(dets)
 
-    from cvtools.evaluation.mean_ap import eval_map
-    mean_ap, eval_results = eval_map(det_results, gt_bboxes, gt_labels)
-    print(mean_ap, eval_results)
+    # from cvtools.evaluation.mean_ap import eval_map
+    # mean_ap, eval_results = eval_map(det_results, gt_bboxes, gt_labels)
+    # print(mean_ap, eval_results)
