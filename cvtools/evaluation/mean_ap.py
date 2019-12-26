@@ -1,3 +1,7 @@
+# ----------------------------------------------------------
+# From mmdetection
+# Modified by jiang.g.f
+# ----------------------------------------------------------
 import cvtools
 import numpy as np
 from terminaltables import AsciiTable
@@ -207,7 +211,7 @@ def get_cls_results(det_results, gt_bboxes, gt_labels, gt_ignore, class_id):
     cls_gt_ignore = []
     for j in range(len(gt_bboxes)):
         gt_bbox = gt_bboxes[j]
-        cls_inds = (gt_labels[j] == class_id + 1)
+        cls_inds = (gt_labels[j] == class_id + 1)   # label从1开始
         cls_gt = gt_bbox[cls_inds, :] if gt_bbox.shape[0] > 0 else gt_bbox
         cls_gts.append(cls_gt)
         if gt_ignore is None:
@@ -229,8 +233,9 @@ def eval_map(det_results,
 
     Args:
         det_results (list): a list of list, [[cls1_det, cls2_det, ...], ...]
+            cls1_det为np.array，包含K*5，包含得分, x1y1x2y2形式
         gt_bboxes (list): ground truth bboxes of each image, a list of K*4
-            array.
+            array. x1y1x2y2形式
         gt_labels (list): ground truth labels of each image, a list of K array
         gt_ignore (list): gt ignore indicators of each image, a list of K array
         scale_ranges (list, optional): [(min1, max1), (min2, max2), ...]
