@@ -6,6 +6,7 @@
 import cvtools
 import os.path as osp
 import shutil
+from collections import defaultdict
 
 current_path = osp.dirname(__file__)
 
@@ -79,3 +80,33 @@ def test_write_read():
     assert isinstance(dict_data, dict)
     assert isinstance(dict_data['cat1'], int)
 
+
+def dd():
+    return defaultdict(int)
+
+
+def test_dump_pkl():
+    data = defaultdict(list)
+    data['a'] = [0, 1, 2]
+    cvtools.dump_pkl(data, current_path + '/out/file_io/defaultdict.pkl')
+    data_load = cvtools.load_pkl(current_path + '/out/file_io/defaultdict.pkl')
+    assert isinstance(data_load, defaultdict)
+
+    nest_dict = defaultdict(dd)
+    nest_dict['1'] = data_load
+    cvtools.dump_pkl(nest_dict,
+                     current_path + '/out/file_io/nest_defaultdict.pkl')
+    data_load = cvtools.load_pkl(
+        current_path + '/out/file_io/nest_defaultdict.pkl')
+    assert isinstance(data_load, defaultdict)
+
+    # see: https://hant-kb.kutu66.com/python/post_782098
+    nest_dict = defaultdict(lambda: defaultdict(int))
+    nest_dict['1'] = data_load
+    try:
+        cvtools.dump_pkl(nest_dict,
+                         current_path + '/out/file_io/nest_defaultdict.pkl')
+    except AttributeError:
+        pass
+    else:
+        assert False

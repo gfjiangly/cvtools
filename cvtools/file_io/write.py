@@ -25,13 +25,14 @@ def dump_json(data, to_file='data.json'):
     print('!save {} finished'.format(to_file))
 
 
-def dump_pkl(data, to_file: str):
+def dump_pkl(data, to_file='data.pkl'):
     """使用pickle序列化对象
 
     Args:
         data: 待序列化对象
         to_file: 保存的文件名
     """
+    cvtools.makedirs(to_file)
     # 默认 using protocol 0. 负数表示最高协议
     with open(to_file, 'wb') as f:
         pickle.dump(data, f, -1)

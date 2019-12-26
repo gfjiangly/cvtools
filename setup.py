@@ -48,6 +48,14 @@ ext_modules = [
         include_dirs=[numpy.get_include(), './'],
         # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
         extra_compile_args=[]
+    ),
+    Extension(
+        'cvtools.ops.nms.soft_nms_cpu',
+        sources=[
+            'cvtools/ops/nms/src/soft_nms_cpu.pyx'
+        ],
+        include_dirs=[numpy.get_include(), './'],
+        extra_compile_args=[]
     )
 ]
 
