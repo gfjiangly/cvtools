@@ -239,7 +239,7 @@ def eval_map(det_results,
         gt_labels (list): ground truth labels of each image, a list of K array
         gt_ignore (list): gt ignore indicators of each image, a list of K array
         scale_ranges (list, optional): [(min1, max1), (min2, max2), ...]
-        iou_thr (float): IoU threshold
+        iou_thr (float): IoU threshold，目前还不支持polyiou
         dataset (None or str or list): dataset name or dataset classes, there
             are minor differences in metrics for different datsets, e.g.
             "voc07", "imagenet_det", etc.

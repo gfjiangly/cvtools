@@ -63,7 +63,7 @@ class COCO2Jiang(object):
             line += file_name + ' '
             for ann in self.imgToAnns[img_id]:
                 bbox = ann['bbox']
-                bbox = box_utils.x1y1wh_to_xyxy(bbox)
+                bbox = box_utils.x1y1wh_to_x1y1x2y2(bbox)
                 cat = ann['category_id']
                 bbox_str = ','.join(map(str, map(int, bbox)))
                 line += bbox_str + ',' + str(cat) + ' '
