@@ -9,6 +9,7 @@
 import numpy as np
 import random
 import cv2.cv2 as cv
+import warnings
 
 from cvtools.data_augs.crop.crop_abc import CropMethod
 
@@ -46,7 +47,8 @@ def sliding_crop(img, crop_w, crop_h, overlap=0.1):
 
 def crop_for_small_intensive(img, anns, small_prop=0.5, max_objs=100,
                              overlap=0.1):
-    # 1 是否小目标比例超过small_prop
+    """此函数已废弃"""
+    # 1 是否小目标比例超过small_prop && 目标数量超过50
     areas = []
     for obj in anns:
         # prepare for Polygon class input
@@ -70,6 +72,7 @@ def crop_for_small_intensive(img, anns, small_prop=0.5, max_objs=100,
 
 
 def crop_for_large_img(img, overlap=0.1, size_th=1024):
+    """此函数已废弃"""
     # 2 图片宽或高超过size_th
     h, w, _ = img.shape
     if h > size_th or w > size_th:
@@ -79,7 +82,6 @@ def crop_for_large_img(img, overlap=0.1, size_th=1024):
 
 
 def crop_for_protected(img, anns, size_th=1024, strict=True):
-    # 3 滑窗裁剪中被破坏的大目标
     def cal_edge(objs, size):
         """求所有segmentation的外接矩形，也可以求所有bbox的外接矩形"""
         obbs = np.array([obj['segmentation'][0]
@@ -105,18 +107,7 @@ def crop_for_protected(img, anns, size_th=1024, strict=True):
         new_y2 = h - 1 if new_y2 >= h else new_y2
         return new_x1, new_y1, new_x2, new_y2
     img_boxes = []
-    # all_protect_crop = cal_edge(anns, size_th)
-    # if len(all_protect_crop) > 0:
-    #     img_boxes.append(all_protect_crop)
-    if len(anns) > 0:   # 为每个大实例做裁剪
-        # areas = []
-        # for obj in anns:
-        #     a = np.array(obj['segmentation'][0]).reshape(4, 2)
-        #     a_hull = cv.convexHull(a.astype(np.float32), clockwise=False)
-        #     areas.append(cv.contourArea(a_hull))
-        # large_ids = [i for i, area in enumerate(areas) if area > 96 * 96]
-        # each_protect_crops = [cal_edge([anns[ind]], size_th)
-        #                       for ind in large_ids]
+    if len(anns) > 0:
         each_protect_crops = [cal_edge([obj], size_th) for obj in anns]
         img_boxes += [crop for crop in each_protect_crops if len(crop) > 0]
     return img_boxes
@@ -125,7 +116,7 @@ def crop_for_protected(img, anns, size_th=1024, strict=True):
 class CropImageInOrder(CropMethod):
     def __init__(self, crop_w=1024, crop_h=1024, overlap=0.1, iof_th=0.7,
                  size_th=1024):
-        """
+        """滑动窗口裁剪，结果稳定，不存在随机
 
         Args:
             crop_w (int): 滑动裁剪的宽
@@ -166,15 +157,21 @@ class CropImageProtected(CropMethod):
 
 class CropImageAdaptive(CropMethod):
     def __init__(self, overlap=0.1, iof_th=0.7, small_prop=0.5, max_objs=100,
-                 size_th=1024, strict_size=True):
-        """
+                 slide_size=800, size_th=1024, strict_size=None):
+        """自适应裁剪，存在部分随机因素
+
+        废弃strict_size参数
+        strict_size参数可被size_th取代，size_th < 0等价于strict_size=False
 
         Args:
             iof_th: 实例在图像内的大小占自己本身大小的比例的阈值，小于此大小将被过滤
             small_prop: 一张图中小实例占实例总数比例
             max_objs: 一张图允许最大的实例数
             overlap: 顺序裁剪时的重合率
+            slide_size: 一般情况下使用的滑动窗口
             size_th: 宽或高超过此阈值，认为应该被crop
+            strict_size: 是否严格限制裁剪的大小。为True，则裁剪大小不超过size_th；
+                为False，则不限制
         """
         super().__init__(iof_th)
         assert 1.0 >= iof_th >= 0.5
@@ -182,48 +179,79 @@ class CropImageAdaptive(CropMethod):
         self.small_prop = small_prop
         self.max_objs = max_objs
         self.overlap = overlap
+        self.slide_size = slide_size
         self.size_th = size_th
-        self.strict_size = strict_size
+        self.strict_size = True if self.size_th > 0 else False
         self.img_boxes = []
         self.stats_crop = {'small': 0, 'large': 0, 'protect': 0}
+        if strict_size is not None:
+            warnings.warn(
+                'strict_size argument deprecated, using size_th < 0 instead',
+                DeprecationWarning
+            )
+
+    def _crop_for_small_intensive(self, img, anns):
+        will_crop = True
+        # 1.1 是否小目标比例超过small_prop
+        areas = [ann['bbox'][2] * ann['bbox'][3] for ann in anns]
+        small_areas = [area for area in areas if area <= 32 * 32]
+        if len(small_areas) < self.small_prop * len(areas):
+            will_crop = False
+        # 1.2 是否目标数量超过max_objs
+        if len(anns) < self.max_objs:
+            will_crop = False
+        # 1.3 是否图片面积/目标数 < 50.
+        img_ann_ratio = img.shape[1] * img.shape[2] / len(anns)
+        if img_ann_ratio > 50.:
+            will_crop = False
+        if will_crop:
+            # print(img_ann_ratio)
+            self.stats_crop['small'] += 1
+            self.img_boxes += sliding_crop(
+                img, self.slide_size//3*2, self.slide_size//3*2,
+                overlap=self.overlap)
+
+    def _crop_for_large_img(self, img):
+        # 2 图片宽或高超过size_th
+        h, w, _ = img.shape
+        if h > self.size_th or w > self.size_th:
+            self.stats_crop['large'] += 1
+            self.img_boxes += sliding_crop(
+                img, self.slide_size, self.slide_size, overlap=self.overlap)
+
+    def _crop_for_protected(self, img, anns):
+        # 3.1 iof阈值筛选
+        gt_boxes = [ann['bbox'] for ann in anns]
+        iof = self.cal_iof(gt_boxes)
+        gt_ids = set(list(range(0, len(gt_boxes))))
+        ids_out = gt_ids - set(np.where(iof > self.iof_th)[0])  # fix bug!
+        # 3.2 大目标筛选
+        ids_out = [ind for ind in ids_out  # 这里放大大目标的标准
+                   if anns[ind]['bbox'][2] * anns[ind]['bbox'][3] > 96 * 96 * 2]
+        # 同时满足3.1&&3.2才进行保护裁剪
+        if len(ids_out) > 0:
+            ann_croped = [anns[i] for i in ids_out]
+            add_img_boxes = crop_for_protected(
+                img, ann_croped, self.size_th, self.strict_size)
+            if len(add_img_boxes) > 0:
+                self.stats_crop['protect'] += 1
+            self.img_boxes += add_img_boxes
 
     def crop(self, img, anns=None):
         """
         可能crop算法可能需要根据标签信息
         """
         assert anns is not None, "自适应crop必须提供标签信息"
-        # 1 是否小目标比例超过small_prop,或,是否目标数量超过max_objs
-        self.img_boxes = crop_for_small_intensive(
-            img, anns, small_prop=self.small_prop,
-            max_objs=self.max_objs, overlap=self.overlap / 2)
-        if len(self.img_boxes) > 0:
-            self.stats_crop['small'] += 1
-        # 2 图片宽或高超过size_th
-        if len(self.img_boxes) == 0:
-            self.img_boxes = crop_for_large_img(img, self.overlap, self.size_th)
-            if len(self.img_boxes) > 0:
-                self.stats_crop['large'] += 1
+        self.img_boxes = []
+        if len(anns) > 0:
+            # 1 密集小目标裁剪
+            self._crop_for_small_intensive(img, anns)
+            # 2 大图裁剪
+            if len(self.img_boxes) == 0:
+                self._crop_for_large_img(img)
         if len(self.img_boxes) == 0:
             self.img_boxes = [(0, 0, img.shape[1] - 1, img.shape[0] - 1)]
-            return  # 不需要裁剪
-        # if not self.strict_size:
-        #     self.img_boxes.append((0, 0, img.shape[1] - 1, img.shape[0] - 1))
+            return self.img_boxes  # 不需要裁剪
         # 以下操作不保证可以增加self.img_boxes元素
-        # gt_boxes = [obj['bbox'] for obj in anns]
-        # if len(gt_boxes) == 0:
-        #     return  # 没有被破话的anns了
-        # # 3.1 iof阈值筛选被破坏的
-        # iof = self.cal_iof(gt_boxes)
-        # ids_out = set(np.where(iof < self.iof_th)[0])
-        # # 3.2 ann's box宽高筛选被破坏的
-        # ids_out = [ind for ind in ids_out
-        #            if anns[ind]['bbox'][2] * anns[ind]['bbox'][3] > 96 * 96 * 2]
-        # # 同时满足3.1&&3.2才进行保护裁剪
-        # if 10 > len(ids_out) > 0:
-        #     ann_croped = [anns[i] for i in ids_out]
-        #     add_img_boxes = crop_for_protected(
-        #         img, ann_croped, self.size_th, self.strict_size)
-        #     if len(add_img_boxes) > 0:
-        #         self.stats_crop['protect'] += 1
-        #     self.img_boxes += add_img_boxes
+        self._crop_for_protected(img, anns)
         return self.img_boxes
