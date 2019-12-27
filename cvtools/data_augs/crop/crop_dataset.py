@@ -45,9 +45,11 @@ class CocoDatasetForCrop(CropDataset):
         ann_ids = self.COCO.getAnnIds(imgIds=entry['id'], iscrowd=None)
         anns = self.COCO.loadAnns(ann_ids)
         anns = [
-            {'bbox': ann['bbox'],
-             'segmentation': ann['segmentation'],
-             'category_id': ann['category_id']
+            {
+                'id': ann['id'],
+                'bbox': ann['bbox'],
+                'segmentation': ann['segmentation'],
+                'category_id': ann['category_id']
              }  # 此处可以订制
             for ann in anns]
         return {'image': image_file, 'anns': anns}
@@ -56,6 +58,8 @@ class CocoDatasetForCrop(CropDataset):
         return len(self.roidb)
 
     def save(self, crops, to_file, limit_border=False):
+        """通过自然索引对齐两组数据要小心"""
+        assert len(self.roidb) == len(crops)
         new_images = []
         new_annotations = []
         image_id = 1
