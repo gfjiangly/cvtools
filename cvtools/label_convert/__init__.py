@@ -9,10 +9,12 @@ from .voc_to_darknet import VOC2DarkNet
 from .dota_to_coco import DOTA2COCO
 from .arcsoft import (rect_reserved, face_reserved, head_reserved,
                       gender_reserved)
+from .coco_to_dets import COCO2Dets
 
 __all__ = [
     'VOC2COCO',
     'VOC2DarkNet',
     'DOTA2COCO',
     'rect_reserved', 'face_reserved', 'head_reserved', 'gender_reserved',
+    'COCO2Dets'
 ]
