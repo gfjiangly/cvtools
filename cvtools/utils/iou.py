@@ -5,6 +5,10 @@
 # @File    : iou.py
 # @Software: PyCharm
 import numpy as np
+import platform
+
+if platform.system() == "Linux":
+    import polyiou
 
 
 def bbox_overlaps(bboxes1, bboxes2, mode='iou'):
@@ -50,6 +54,33 @@ def bbox_overlaps(bboxes1, bboxes2, mode='iou'):
         else:
             union = area1[i] if not exchange else area2
         ious[i, :] = overlap / union
+    if exchange:
+        ious = ious.T
+    return ious
+
+
+def polygon_overlaps(polygons1, polygons2, mode='iou'):
+    assert mode in ['iou', 'iof']
+    polygons1 = polygons1.astype(np.float32)
+    polygons2 = polygons2.astype(np.float32)
+    rows = polygons1.shape[0]
+    cols = polygons2.shape[0]
+    ious = np.zeros((rows, cols), dtype=np.float32)
+    if rows * cols == 0:
+        return ious
+    exchange = False
+    if polygons1.shape[0] > polygons2.shape[0]:
+        polygons1, polygons2 = polygons2, polygons1
+        ious = np.zeros((cols, rows), dtype=np.float32)
+        exchange = True
+    for i in range(polygons1.shape[0]):
+        for j in range(polygons2.shape[0]):
+            try:
+                ious[i, j] = polyiou.iou_poly(
+                    polyiou.VectorDouble(polygons1[i][:8].tolist()),
+                    polyiou.VectorDouble(polygons2[j][:8].tolist()))
+            except IndexError:
+                ious[i, j] = 0.
     if exchange:
         ious = ious.T
     return ious

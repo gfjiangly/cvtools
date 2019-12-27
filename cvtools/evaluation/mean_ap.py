@@ -61,7 +61,8 @@ def tpfp_imagenet(det_bboxes,
                   gt_bboxes,
                   gt_ignore,
                   default_iou_thr,
-                  area_ranges=None):
+                  area_ranges=None,
+                  calc_ious=bbox_overlaps):
     """Check if detected bboxes are true positive or false positive.
 
     Args:
@@ -92,7 +93,7 @@ def tpfp_imagenet(det_bboxes,
             for i, (min_area, max_area) in enumerate(area_ranges):
                 fp[i, (det_areas >= min_area) & (det_areas < max_area)] = 1
         return tp, fp
-    ious = bbox_overlaps(det_bboxes, gt_bboxes - 1)
+    ious = calc_ious(det_bboxes, gt_bboxes - 1)
     gt_w = gt_bboxes[:, 2] - gt_bboxes[:, 0] + 1
     gt_h = gt_bboxes[:, 3] - gt_bboxes[:, 1] + 1
     iou_thrs = np.minimum((gt_w * gt_h) / ((gt_w + 10.0) * (gt_h + 10.0)),
@@ -133,12 +134,13 @@ def tpfp_imagenet(det_bboxes,
             else:
                 bbox = det_bboxes[i, :4]
                 area = (bbox[2] - bbox[0] + 1) * (bbox[3] - bbox[1] + 1)
-                if area >= min_area and area < max_area:
+                if max_area > area >= min_area:
                     fp[k, i] = 1
     return tp, fp
 
 
-def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
+def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None,
+                 calc_ious=bbox_overlaps):
     """Check if detected bboxes are true positive or false positive.
 
     Args:
@@ -146,6 +148,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
         gt_bboxes (ndarray): ground truth bboxes of this image
         gt_ignore (ndarray): indicate if gts are ignored for evaluation or not
         iou_thr (float): the iou thresholds
+        calc_ious: 自定义计算iou方法
 
     Returns:
         tuple: (tp, fp), two arrays whose elements are 0 and 1
@@ -170,7 +173,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
             for i, (min_area, max_area) in enumerate(area_ranges):
                 fp[i, (det_areas >= min_area) & (det_areas < max_area)] = 1
         return tp, fp
-    ious = bbox_overlaps(det_bboxes, gt_bboxes)
+    ious = calc_ious(det_bboxes, gt_bboxes)
     ious_max = ious.max(axis=1)
     ious_argmax = ious.argmax(axis=1)
     sort_inds = np.argsort(-det_bboxes[:, -1])
@@ -198,7 +201,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None):
             else:
                 bbox = det_bboxes[i, :4]
                 area = (bbox[2] - bbox[0] + 1) * (bbox[3] - bbox[1] + 1)
-                if area >= min_area and area < max_area:
+                if max_area > area >= min_area:
                     fp[k, i] = 1
     return tp, fp
 
@@ -228,7 +231,8 @@ def eval_map(det_results,
              scale_ranges=None,
              iou_thr=0.5,
              dataset=None,
-             print_summary=True):
+             print_summary=True,
+             calc_ious=bbox_overlaps):
     """Evaluate mAP of a dataset.
 
     Args:
@@ -270,7 +274,7 @@ def eval_map(det_results,
             tpfp_imagenet if dataset in ['det', 'vid'] else tpfp_default)
         tpfp = [
             tpfp_func(cls_dets[j], cls_gts[j], cls_gt_ignore[j], iou_thr,
-                      area_ranges) for j in range(len(cls_dets))
+                      area_ranges, calc_ious) for j in range(len(cls_dets))
         ]
         tp, fp = tuple(zip(*tpfp))
         # calculate gt number of each scale, gts ignored or beyond scale

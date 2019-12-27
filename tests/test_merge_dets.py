@@ -7,14 +7,14 @@
 import os.path as osp
 import numpy as np
 import cvtools
-from cvtools.evaluation.merge_dets import ConvertGT2Dets, MergeCropDetResults
+from cvtools.evaluation.merge_dets import MergeCropDetResults
 
 current_path = osp.dirname(__file__)
 
 
 def test_convert_gt_to_dets():
     ann_file = current_path + '/data/DOTA/dota_crop_1024.json'
-    gt = ConvertGT2Dets(ann_file)
+    gt = cvtools.COCO2Dets(ann_file)
     gt.convert(to_file=current_path + '/out/DOTA/dets.pkl')
 
 
@@ -22,7 +22,7 @@ def test_MergeCropDetResults():
     ann_file = current_path + '/data/DOTA/dota_crop_1024.json'
     results = current_path + '/out/DOTA/dets.pkl'
 
-    gt = ConvertGT2Dets(ann_file)
+    gt = cvtools.COCO2Dets(ann_file)
     gt.convert(to_file=results)
 
     dets = MergeCropDetResults(ann_file, results)
