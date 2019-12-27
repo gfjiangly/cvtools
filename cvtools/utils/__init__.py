@@ -20,7 +20,8 @@ from .label import (read_arcsoft_txt_format, read_jiang_txt,
 from .iou import (box_iou, bbox_overlaps)
 # from .cluster import k_means_cluster, DBSCAN_cluster
 from .misc import (is_str, iter_cast, list_cast, tuple_cast, is_seq_of,
-                   is_list_of, is_tuple_of, slice_list, concat_list)
+                   is_list_of, is_tuple_of, slice_list, concat_list,
+                   is_array_like)
 from .logging import get_logger, logger_file_handler
 
 
@@ -47,7 +48,7 @@ __all__ = [
     # 'k_means_cluster', 'DBSCAN_cluster',
 
     'is_str', 'iter_cast', 'list_cast', 'tuple_cast', 'is_seq_of', 'is_list_of',
-    'is_tuple_of', 'slice_list', 'concat_list',
+    'is_tuple_of', 'slice_list', 'concat_list', 'is_array_like',
 
     'get_logger', 'logger_file_handler',
 ]

@@ -69,3 +69,8 @@ def get_time_str(form='%Y%m%d_%H%M%S'):
 
 def get_timestamp_str():
     return str(int(round(time.time() * 1000000)))
+
+
+def get_human_time():
+    # TODO: 人类友好的时间字符串
+    pass

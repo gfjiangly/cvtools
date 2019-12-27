@@ -16,6 +16,10 @@ def is_str(x):
     return isinstance(x, six.string_types)
 
 
+def is_array_like(obj):
+    return hasattr(obj, '__iter__') and hasattr(obj, '__len__')
+
+
 def iter_cast(inputs, dst_type, return_type=None):
     """Cast elements of an iterable object into some type.
 
