@@ -21,4 +21,4 @@ from .version import __version__
 
 
 _DEBUG = False
-
+_NUM_DATA = 10
