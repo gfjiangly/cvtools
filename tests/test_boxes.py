@@ -7,6 +7,7 @@
 import numpy as np
 
 import cvtools
+from cvtools.utils.boxes import cut_polygon
 
 
 def test_rotate_rect():
@@ -21,3 +22,11 @@ def test_rotate_rect():
     angle = 45
     new_rect = cvtools.rotate_rect(rect, center, angle)
     print(new_rect)
+
+
+def test_cut_polygon():
+    a = [(15, 15), (10, 10), (10, 20), (5, 15)]
+    b = [(0, 0), (12.5, 0), (12.5, 30), (0, 30)]
+    r = cut_polygon(a, b)
+    assert len(r[0].shape) == 2 and r[0].shape[1] == 2
+    assert len(r[1]) == 4

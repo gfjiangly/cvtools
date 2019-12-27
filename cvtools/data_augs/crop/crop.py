@@ -83,6 +83,6 @@ class CropLargeImages(Crop):
     def crop_for_test(self):
         pass
 
-    def save(self, to_file):
-        self.dataset.save(self.crops, to_file=to_file)
+    def save(self, to_file, limit_border=False):
+        self.dataset.save(self.crops, to_file, limit_border)
         self.crops = []

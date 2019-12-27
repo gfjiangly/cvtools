@@ -8,12 +8,13 @@
 import os.path as osp
 import numpy as np
 import copy
-from shapely.geometry import Polygon
 
 import cvtools
 from cvtools.data_augs.crop.crop_abc import CropDataset
 from cvtools.data_augs.crop.crop_abc import cal_iof
 from cvtools.utils.boxes import x1y1wh_to_x1y1x2y2x3y3x4y4
+from cvtools.utils.boxes import trans_polygon_to_rbox
+from cvtools.utils.boxes import cut_polygon
 
 
 """
@@ -36,7 +37,7 @@ class CocoDatasetForCrop(CropDataset):
         image_ids.sort()
         self.roidb = self.COCO.loadImgs(image_ids)
         if cvtools._DEBUG:
-            self.roidb = self.roidb[:100]
+            self.roidb = self.roidb[:cvtools._NUM_DATA]
 
     def __getitem__(self, item):
         entry = self.roidb[item]
@@ -106,36 +107,10 @@ class CocoDatasetForCrop(CropDataset):
             segm = segms[id]
             img_box_polygon = np.array(x1y1wh_to_x1y1x2y2x3y3x4y4(
                 cvtools.x1y1x2y2_to_x1y1wh(img_box))).reshape(-1, 2)
-            inters, bounds = cut_polygon(np.array(segm).reshape(-1, 2),
-                                         img_box_polygon)
-            anns[id]['segmentation'] = [inters.reshape(-1).tolist()]
+            # 注意这里polygon不一定为四边形
+            inters, bounds = cut_polygon(segm, img_box_polygon)
+            # TODO: 这里通用性较差
+            if len(inters.reshape(-1).tolist()) != len(segm):
+                inters = trans_polygon_to_rbox(inters)
+            anns[id]['segmentation'] = [inters]
             anns[id]['bbox'] = cvtools.x1y1x2y2_to_x1y1wh(list(bounds))
-
-
-def cut_polygon(polygon, box):
-    # polygon可以不按点的顺序构建，但是必须使用convex_hull求交
-    polygon = Polygon(polygon).convex_hull
-    box = Polygon(box).convex_hull
-    # boundary属性对应的LineString可以直接转为array对象
-    # 最后一个点与第一个点相同，予以去除
-    inters = polygon.intersection(box)
-    try:
-        intersections = np.array(inters.boundary)[:-1]
-        bounds = np.array(inters.bounds)    # 最小外接矩形
-    except ValueError:
-        return None, None
-    return intersections, bounds
-
-
-if __name__ == '__main__':
-    # mode = 'train'
-    # img_prefix = 'D:/data/DOTA/{}/images'.format(mode)
-    # ann_file = 'D:/data/DOTA/annotations/{}_dota+original.json'.format(mode)
-    # dataset = CocoDatasetForCrop(img_prefix, ann_file)
-    # for i in range(len(dataset)):
-    #     data = dataset[i]
-    #     print(data)
-
-    a = [(15, 15), (10, 10), (10, 20), (5, 15)]
-    b = [(0, 0), (12.5, 0), (12.5, 30), (0, 30)]
-    cut_polygon(a, b)

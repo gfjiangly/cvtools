@@ -5,6 +5,7 @@
 # software : PyCharm
 import numpy as np
 import cv2.cv2 as cv
+from shapely.geometry import Polygon
 
 
 def x1y1wh_to_x1y1x2y2(xywh):
@@ -215,3 +216,41 @@ def get_min_area_rect(cnt):
     cnt_hull = cv.convexHull(cnt.astype(np.float32), clockwise=False)
     xywha = cv.minAreaRect(cnt_hull)
     return xywha
+
+
+def trans_polygon_to_rbox(polygon):
+    if not isinstance(polygon, np.ndarray):
+        polygon = np.array(polygon)
+    polygon = polygon.reshape(-1, 2).astype(np.float32)
+    segm_hull = cv.convexHull(polygon, clockwise=False)
+    xywha = cv.minAreaRect(segm_hull)
+    rbox = cv.boxPoints(xywha).reshape(-1).tolist()
+    return rbox
+
+
+def cut_polygon(polygon, box):
+    """求polygon与矩形框的交点，返回交点与外接矩形
+
+    Args:
+        polygon (list or np.array): 多边形，支持一维list或(K,2)list/array
+            不必保持点的顺序
+        box (list or np.array): 必须是4个点形式list或array
+
+    Returns:
+        tuple: 第一个元素是交点, (K,2)数组；第二元素是交点的外接矩形，(4,)数组
+    """
+    # polygon可以不按点的顺序构建，但是必须使用convex_hull求交
+    if not isinstance(polygon, np.ndarray):
+        polygon = np.array(polygon)
+    polygon = polygon.reshape(-1, 2)
+    polygon = Polygon(polygon).convex_hull
+    box = Polygon(box).convex_hull
+    # boundary属性对应的LineString可以直接转为array对象
+    # 最后一个点与第一个点相同，予以去除
+    inters = polygon.intersection(box)
+    try:
+        intersections = np.array(inters.boundary)[:-1]
+        bounds = np.array(inters.bounds)    # 外接矩形
+    except ValueError:
+        return None, None
+    return intersections, bounds
