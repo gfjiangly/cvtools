@@ -36,8 +36,10 @@ class CropLargeImages(Crop):
         for i in range(len(self.dataset)):
             data = self.dataset[i]
             # 索引或迭代dataset必须提供包含image字段和anns字段信息
-            img = cvtools.imread(data['image'])
             anns = data['anns']
+            if len(anns) == 0:
+                print('{} has no label'.format(data['image']))
+            img = cvtools.imread(data['image'])
             self.crop_method.crop(img, anns)
             # croped可为空，即没有任何裁剪，同时原始图亦不保留
             cropped = self.crop_method.match_anns(anns)
@@ -51,8 +53,12 @@ class CropLargeImages(Crop):
             print('crop image %d of %d: %s' %
                   (i, len(self.dataset), osp.basename(data['image'])))
 
+        # 打印和清空统计信息
+        print(self.crop_method.get_stats())
+        self.crop_method.reset_stats()
         if hasattr(self.crop_method, 'stats_crop'):
             print(self.crop_method.stats_crop)
+            self.crop_method.stats_crop = {}
 
     def over_sample(self, img, anns, over_samples):
         add_crops = defaultdict()
