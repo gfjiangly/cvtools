@@ -10,13 +10,13 @@ cvtools是主要用于计算机视觉领域的Python工具包。
 """
 
 from .cocotools import *
+from .ops import *
 from .utils import *
 from .file_io import *
 from .evaluation import *
 from .label_convert import *
 from .label_analysis import *
 from .data_augs import *
-from .ops import *
 from .version import __version__
 
 

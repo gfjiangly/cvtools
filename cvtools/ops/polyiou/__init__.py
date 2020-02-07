@@ -1,13 +1,11 @@
 # -*- encoding:utf-8 -*-
-# @Time    : 2019/12/25 21:53
+# @Time    : 2020/2/7 23:10
 # @Author  : jiang.g.f
 # @File    : __init__.py
 # @Software: PyCharm
 
-from .nms import py_cpu_nms, soft_nms
 from .polyiou import VectorDouble, iou_poly
 
 __all__ = [
-    'py_cpu_nms', 'soft_nms',
     'VectorDouble', 'iou_poly'
 ]

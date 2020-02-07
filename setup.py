@@ -58,10 +58,10 @@ ext_modules = [
         extra_compile_args=[]
     ),
     Extension(
-        'cvtools.ops.iou.polyiou',
+        'cvtools.ops.polyiou._polyiou',
         sources=[
-            'cvtools/ops/iou/polyiou_wrap.cxx',
-            'cvtools/ops/iou/polyiou.cpp'
+            'cvtools/ops/polyiou/src/polyiou_wrap.cxx',
+            'cvtools/ops/polyiou/src/polyiou.cpp'
         ],
         extra_compile_args=[]
     )
