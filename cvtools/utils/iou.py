@@ -5,10 +5,8 @@
 # @File    : iou.py
 # @Software: PyCharm
 import numpy as np
-import platform
 
-if platform.system() == "Linux":
-    import polyiou
+from cvtools.ops import VectorDouble, iou_poly
 
 
 def bbox_overlaps(bboxes1, bboxes2, mode='iou'):
@@ -76,9 +74,10 @@ def polygon_overlaps(polygons1, polygons2, mode='iou'):
     for i in range(polygons1.shape[0]):
         for j in range(polygons2.shape[0]):
             try:
-                ious[i, j] = polyiou.iou_poly(
-                    polyiou.VectorDouble(polygons1[i][:8].tolist()),
-                    polyiou.VectorDouble(polygons2[j][:8].tolist()))
+                ious[i, j] = iou_poly(
+                    VectorDouble(polygons1[i][:8].tolist()),
+                    VectorDouble(polygons2[j][:8].tolist())
+                )
             except IndexError:
                 ious[i, j] = 0.
     if exchange:

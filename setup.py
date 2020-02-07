@@ -56,6 +56,14 @@ ext_modules = [
         ],
         include_dirs=[numpy.get_include(), './'],
         extra_compile_args=[]
+    ),
+    Extension(
+        'cvtools.ops.iou.polyiou',
+        sources=[
+            'cvtools/ops/iou/polyiou_wrap.cxx',
+            'cvtools/ops/iou/polyiou.cpp'
+        ],
+        extra_compile_args=[]
     )
 ]
 

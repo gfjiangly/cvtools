@@ -5,7 +5,9 @@
 # @Software: PyCharm
 
 from .nms import py_cpu_nms, soft_nms
+from .iou.polyiou import VectorDouble, iou_poly
 
 __all__ = [
-    'py_cpu_nms', 'soft_nms'
+    'py_cpu_nms', 'soft_nms',
+    'VectorDouble', 'iou_poly'
 ]
