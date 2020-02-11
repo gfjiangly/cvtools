@@ -9,7 +9,7 @@ from .file import (get_files_list, get_images_list, split_list, split_dict,
                    sample_label_from_images, folder_name_replace,
                    files_name_replace, folder_name_replace, files_name_replace,
                    check_file_exist, isfile_casesensitive, is_image_file,
-                   find_in_path)
+                   find_in_path, splitpath)
 from .image import (imread, imwrite, draw_boxes_texts, draw_class_distribution,
                     draw_hist)
 from .boxes import (x1y1wh_to_x1y1x2y2, x1y1x2y2_to_x1y1wh, xywh_to_x1y1x2y2,
@@ -32,7 +32,7 @@ __all__ = [
     'split_data', 'replace_filename_space', 'check_rept', 'makedirs',
     'sample_label_from_images', 'folder_name_replace', 'files_name_replace',
     'folder_name_replace', 'files_name_replace', 'check_file_exist',
-    'isfile_casesensitive', 'is_image_file', 'find_in_path',
+    'isfile_casesensitive', 'is_image_file', 'find_in_path', 'splitpath',
 
     'imread', 'imwrite', 'draw_boxes_texts', 'draw_class_distribution',
     'draw_hist',

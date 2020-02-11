@@ -143,7 +143,9 @@ setup(
     install_requires=install_requires,
     ext_modules=ext_modules,
     cmdclass={'build_ext': BuildExtension},
-    zip_safe=False)
+    zip_safe=False,
+    entry_points={'console_scripts': ['cvtools=cvtools:main']},
+)
 
 """如果应用在开发过程中会频繁变更，每次安装还需要先将原来的版本卸掉，很麻烦。
 使用”develop”开发方式安装的话，应用代码不会真的被拷贝到本地Python环境的”site-packages”目录下，

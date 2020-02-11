@@ -18,7 +18,8 @@ from .label_convert import *
 from .label_analysis import *
 from .data_augs import *
 from .version import __version__
-
+from .web import *
+from .cmd import main
 
 _DEBUG = False
 _NUM_DATA = 10

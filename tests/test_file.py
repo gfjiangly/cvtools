@@ -24,3 +24,11 @@ def test_makedirs():
     assert cvtools.makedirs(current_path + '/out/dir\\test2/test.txt')
     assert cvtools.makedirs(current_path + '/out/dir/test3/test.txt')
     assert cvtools.makedirs(current_path + '/out/dir/test3/../test4/test.txt')
+
+
+def test_splitpath():
+    print(cvtools.splitpath("E:/A/B.py"))
+    print(cvtools.splitpath("B.py"))
+    print(cvtools.splitpath("root/A/B.py"))
+    print(cvtools.splitpath("../A/B.py"))
+    print(cvtools.splitpath("B"))

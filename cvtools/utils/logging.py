@@ -7,9 +7,9 @@
 import logging
 
 
-def get_logger(log_level, name=None):
+def get_logger(level=logging.INFO, name=None):
     logging.basicConfig(
-        format='%(asctime)s - %(levelname)s - %(message)s', level=log_level)
+        format='%(asctime)s - %(levelname)s - %(message)s', level=level)
     logger = logging.getLogger(name)
     return logger
 

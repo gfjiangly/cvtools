@@ -12,14 +12,20 @@ from tqdm import tqdm
 import cvtools
 
 
+def splitpath(path):
+    filepath, tempfilename = osp.split(path)
+    filename, extension = osp.splitext(tempfilename)
+    return filepath, filename, extension
+
+
 def find_in_path(name, path):
     """Find a file in a search path"""
     # Adapted fom
     # http://code.activestate.com/recipes/52224-find-a-file-given-a-search-path/
     for dir in path.split(os.pathsep):
         binpath = osp.join(dir, name)
-        if os.path.exists(binpath):
-            return os.path.abspath(binpath)
+        if osp.exists(binpath):
+            return osp.abspath(binpath)
     return None
 
 
