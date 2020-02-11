@@ -12,6 +12,17 @@ from tqdm import tqdm
 import cvtools
 
 
+def find_in_path(name, path):
+    """Find a file in a search path"""
+    # Adapted fom
+    # http://code.activestate.com/recipes/52224-find-a-file-given-a-search-path/
+    for dir in path.split(os.pathsep):
+        binpath = osp.join(dir, name)
+        if os.path.exists(binpath):
+            return os.path.abspath(binpath)
+    return None
+
+
 # 递归文件夹下所有文件夹，得到文件列表(含路径)
 def _get_files_list(root_dir):
     """get all files under the given path.

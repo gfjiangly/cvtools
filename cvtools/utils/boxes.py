@@ -67,6 +67,22 @@ def x1y1wh_to_x1y1x2y2x3y3x4y4(xywh):
         raise TypeError('Argument xywh must be a list, tuple, or numpy array.')
 
 
+def polygon_to_x1y1wh(polygon):
+    """求polygon的外接正矩形
+
+    Args:
+        polygon (list or np.array): 多边形点集
+
+    Returns:
+        tuple: x1y1wh形式矩形
+    """
+    if not isinstance(polygon, np.ndarray):
+        polygon = np.array(polygon)
+    polygon = polygon.reshape(-1, 2)
+    x1y1wh = cv.boundingRect(polygon)
+    return x1y1wh
+
+
 def xywh_to_x1y1x2y2(xywh):
     """Convert [x y w h] box format to [x1 y1 x2 y2] format."""
     if isinstance(xywh, (list, tuple)):
@@ -162,7 +178,13 @@ def rotate_rect(rect, center, angle):
 def rotate_rects(rects, centers, angle):
     """一个数学问题：坐标矩阵与旋转矩阵相乘.
     在笛卡尔坐标系中，angle>0, 逆时针旋转; angle<0, 顺时针旋转
-    return: x1y1x2y2x3y3x4y4 format box"""
+    return: x1y1x2y2x3y3x4y4 format box
+
+    Args:
+        rects: x1y1x2y2形式list或array
+        centers: 旋转中心
+        angle: 旋转角度
+    """
     if not isinstance(rects, np.ndarray):
         rects = np.array([rects])
     if not isinstance(centers, np.ndarray):
@@ -190,7 +212,13 @@ def rotate_rects(rects, centers, angle):
 
 
 def xywha_to_x1y1x2y2x3y3x4y4(xywha):
-    """用旋转的思路做变换是最通用和最简单的"""
+    """用旋转的思路做变换是最通用和最简单的
+
+    警告：目前多维一起操作还有些问题！
+
+    Args:
+        xywha: (5,)一维list或(K, 5)多维array
+    """
     if isinstance(xywha, (list, tuple)):
         assert len(xywha) == 5
         return rotate_rect(xywha[:4], xywha[:2], xywha[4:5])
@@ -198,6 +226,17 @@ def xywha_to_x1y1x2y2x3y3x4y4(xywha):
         return rotate_rects(xywha[:, :4], xywha[:, :2], xywha[:, 4:5])
     else:
         raise TypeError('Argument xywha must be a list, tuple, or numpy array.')
+
+
+def tran_xywha_to_rbox(xywha):
+    """包装opencv的cv.boxPoints函数
+
+    Args:
+        xywha: ((xy),(wh),angle)形式tuple或list, xy为中心点
+    """
+    if len(xywha) != 3:
+        xywha = (xywha[:2], xywha[2:4], xywha[4])
+    return cv.boxPoints(xywha)  # 返回4*2数组
 
 
 def get_min_area_rect(cnt):
@@ -219,6 +258,11 @@ def get_min_area_rect(cnt):
 
 
 def trans_polygon_to_rbox(polygon):
+    """求polygon的最小外接旋转矩形
+
+    Args:
+        polygon: 一维数组，或(K, 2)数组
+    """
     if not isinstance(polygon, np.ndarray):
         polygon = np.array(polygon)
     polygon = polygon.reshape(-1, 2).astype(np.float32)

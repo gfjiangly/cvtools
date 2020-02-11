@@ -22,14 +22,16 @@ class COCO2Dets(object):
         }
         dets:
         {
-            类别：[[位置坐标，得分], [...], ...],
-            类别: [[位置坐标，得分], [...], ...],
+            cls_id：[[位置坐标，得分], [...], ...],
+            cls_id: [[位置坐标，得分], [...], ...],
             ...
         }，
     """
     def __init__(self, anns_file, num_coors=4):
         assert num_coors in (4, 8), "不支持的检测位置表示"
-        self.coco = cvtools.COCO(anns_file)
+        self.coco = anns_file
+        if cvtools.is_str(anns_file):
+            self.coco = cvtools.COCO(anns_file)
         self.results = defaultdict()    # 动态创建嵌套字典
         self.num_coors = num_coors
 
