@@ -5,15 +5,13 @@
 # @Software: PyCharm
 
 import numpy as np
-import platform
 
 import cvtools
 from cvtools.evaluation.merge_dets import MergeCropDetResults
 from cvtools.evaluation.mean_ap import eval_map
-from cvtools.utils.iou import polygon_overlaps, bbox_overlaps
-
-if platform.system() == "Linux":
-    import poly_nms
+from cvtools.utils.iou import bbox_overlaps
+from cvtools.ops.polynms import poly_nms
+from cvtools.ops.polyiou import poly_overlaps
 
 
 class EvalCropQuality(object):
@@ -21,23 +19,25 @@ class EvalCropQuality(object):
     def __init__(self,
                  ann_file,
                  crop_ann_file,
-                 convert_crop_gt=None,
+                 results=None,
                  num_coors=4):
         assert num_coors in (4, 8), "不支持的检测位置表示"
         self.num_coors = num_coors
         self.coco = cvtools.COCO(ann_file)
         self.anns = self.coco.anns
         self.calc_ious = (
-            bbox_overlaps if self.num_coors == 4 else polygon_overlaps)
+            bbox_overlaps if self.num_coors == 4 else poly_overlaps)
         if self.num_coors == 4:
             self.nms = cvtools.py_cpu_nms
         else:
             self.nms = poly_nms.poly_gpu_nms
-        if convert_crop_gt is None:
-            gt = cvtools.COCO2Dets(crop_ann_file)
-        else:
-            gt = convert_crop_gt(crop_ann_file)
-        self.results = gt.convert()
+        self.results = results
+        if cvtools.is_str(crop_ann_file):
+            if results is None:
+                gt = cvtools.COCO2Dets(crop_ann_file)
+                self.results = gt.convert()
+            else:
+                self.results = crop_ann_file
         dets = MergeCropDetResults(crop_ann_file, self.results, self.num_coors)
         self.merge_dets = dets.merge(self.nms)
 

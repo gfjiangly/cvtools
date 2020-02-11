@@ -6,8 +6,6 @@
 # @Software: PyCharm
 import numpy as np
 
-from cvtools.ops import VectorDouble, iou_poly
-
 
 def bbox_overlaps(bboxes1, bboxes2, mode='iou'):
     """Calculate the ious between each bbox of bboxes1 and bboxes2.
@@ -57,36 +55,8 @@ def bbox_overlaps(bboxes1, bboxes2, mode='iou'):
     return ious
 
 
-def polygon_overlaps(polygons1, polygons2, mode='iou'):
-    assert mode in ['iou', 'iof']
-    polygons1 = polygons1.astype(np.float32)
-    polygons2 = polygons2.astype(np.float32)
-    rows = polygons1.shape[0]
-    cols = polygons2.shape[0]
-    ious = np.zeros((rows, cols), dtype=np.float32)
-    if rows * cols == 0:
-        return ious
-    exchange = False
-    if polygons1.shape[0] > polygons2.shape[0]:
-        polygons1, polygons2 = polygons2, polygons1
-        ious = np.zeros((cols, rows), dtype=np.float32)
-        exchange = True
-    for i in range(polygons1.shape[0]):
-        for j in range(polygons2.shape[0]):
-            try:
-                ious[i, j] = iou_poly(
-                    VectorDouble(polygons1[i][:8].tolist()),
-                    VectorDouble(polygons2[j][:8].tolist())
-                )
-            except IndexError:
-                ious[i, j] = 0.
-    if exchange:
-        ious = ious.T
-    return ious
-
-
 # 两种box形式均已测试
-def box_iou(b1, b2, center=False):
+def box_ious(b1, b2, center=False):
     """Return iou tensor
 
     Parameters
@@ -161,4 +131,4 @@ if __name__ == "__main__":
     # intersect_x1y1x2y2 = 65, 80, 202.5, 345   intersect_wh = 137.5, 265
     # BB_area = 150*280, BBGT_area = 145*270
     # iou = 137.5*265 / (150*280 + 145*270 - 137.5*265) = 36437.5 / 44712.5 = 0.8149
-    box_iou(BB, BBGT, center=True)
+    box_ious(BB, BBGT, center=True)

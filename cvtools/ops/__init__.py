@@ -5,9 +5,11 @@
 # @Software: PyCharm
 
 from .nms import py_cpu_nms, soft_nms
-from .polyiou import VectorDouble, iou_poly
+from .polyiou import VectorDouble, iou_poly, poly_overlaps
+from .polynms import poly_nms
 
 __all__ = [
     'py_cpu_nms', 'soft_nms',
-    'VectorDouble', 'iou_poly'
+    'VectorDouble', 'iou_poly', 'poly_overlaps',
+    'poly_nms'
 ]

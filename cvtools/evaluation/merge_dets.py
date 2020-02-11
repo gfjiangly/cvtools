@@ -8,15 +8,16 @@ from collections import defaultdict
 import os.path as osp
 
 import cvtools
+from cvtools.ops.nms import py_cpu_nms
 
 
 class MergeCropDetResults(object):
 
-    def __init__(self, anns_file, results, num_coors=4):
+    def __init__(self, gts, results, num_coors=4):
         """
 
         Args:
-            anns_file (str): DOTA-COCO兼容格式, img_info中必须含crop字段
+            gts (str or COCO): DOTA-COCO兼容格式, img_info中必须含crop字段
             results (str or dict): 子图检测结果，保存在文件中，
                 results:
                 {
@@ -34,12 +35,12 @@ class MergeCropDetResults(object):
             num_coors (int): 4表示左上角右下角box， 8表示四个点的box
         """
         assert num_coors in (4, 8), "不支持的检测位置表示"
-        self.coco = cvtools.COCO(anns_file)
-        self.anns = self.coco.anns
+        self.coco = gts
+        self.results = results
+        if cvtools.is_str(gts):
+            self.coco = cvtools.COCO(gts)
         if cvtools.is_str(results):
             self.results = cvtools.load_pkl(results)
-        else:
-            self.results = results
         self.num_coors = num_coors
         self.img_to_results = {}    # merge返回结果保存
 
@@ -68,7 +69,7 @@ class MergeCropDetResults(object):
                 img_to_results[img_info['file_name']].append(result)
         return img_to_results
 
-    def merge(self, nms_method=cvtools.py_cpu_nms, nms_th=0.15):
+    def merge(self, nms_method=py_cpu_nms, nms_th=0.15):
         """
 
         Args:

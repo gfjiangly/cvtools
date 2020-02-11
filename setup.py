@@ -5,11 +5,14 @@
 # @File    : setup.py
 # @Software: PyCharm
 from setuptools import Extension, dist, find_packages, setup
-
 dist.Distribution().fetch_build_eggs(['Cython', 'numpy>=1.11.1'])
 
+import os
+import platform
 import numpy  # noqa: E402
-from Cython.Distutils import build_ext  # noqa: E402
+from Cython.Build import cythonize  # noqa: E402
+
+from cpp_extension import BuildExtension, CUDAExtension, CUDA
 
 
 install_requires = [
@@ -41,31 +44,76 @@ def get_version():
     return locals()['__version__']
 
 
+# Obtain the numpy include directory.  This logic works across numpy versions.
+try:
+    numpy_include = numpy.get_include()
+except AttributeError:
+    numpy_include = numpy.get_numpy_include()  # 1.6.0中被删除
+
+
+def make_cython_ext(name, module, sources):
+    extra_compile_args = None
+    if platform.system() != 'Windows':
+        extra_compile_args = {
+            'cxx': ['-Wno-unused-function', '-Wno-write-strings']
+        }
+
+    extension = Extension(
+        '{}.{}'.format(module, name),
+        [os.path.join(*module.split('.'), p) for p in sources],
+        include_dirs=[numpy_include],
+        extra_compile_args=extra_compile_args)
+    extension, = cythonize(extension)
+    return extension
+
+
+def make_cuda_ext(name, module, sources):
+    extension = CUDAExtension(
+        name='{}.{}'.format(module, name),
+        sources=[os.path.join(*module.split('.'), p) for p in sources],
+        extra_compile_args={
+            'cxx': [],
+            'nvcc': [
+                '-D__CUDA_NO_HALF_OPERATORS__',
+                '-D__CUDA_NO_HALF_CONVERSIONS__',
+                '-D__CUDA_NO_HALF2_OPERATORS__',
+            ]
+        })
+    extension, = cythonize(extension)
+    return extension
+
+
 ext_modules = [
-    Extension(
-        'cvtools.cocotools._mask',
-        sources=['cvtools/cocotools/maskApi.c', 'cvtools/cocotools/_mask.pyx'],
-        include_dirs=[numpy.get_include(), './'],
-        # originally was ['-Wno-cpp', '-Wno-unused-function', '-std=c99'],
-        extra_compile_args=[]
+    make_cython_ext(
+        name='_mask',
+        module='cvtools.cocotools',
+        sources=['maskApi.c', '_mask.pyx'],
     ),
-    Extension(
-        'cvtools.ops.nms.soft_nms_cpu',
-        sources=[
-            'cvtools/ops/nms/src/soft_nms_cpu.pyx'
-        ],
-        include_dirs=[numpy.get_include(), './'],
-        extra_compile_args=[]
+    make_cython_ext(
+        name='soft_nms_cpu',
+        module='cvtools.ops.nms',
+        sources=['src/soft_nms_cpu.pyx']
     ),
-    Extension(
-        'cvtools.ops.polyiou._polyiou',
-        sources=[
-            'cvtools/ops/polyiou/src/polyiou_wrap.cxx',
-            'cvtools/ops/polyiou/src/polyiou.cpp'
-        ],
-        extra_compile_args=[]
-    )
+    make_cython_ext(
+        name='_polyiou',
+        module='cvtools.ops.polyiou',
+        sources=['src/polyiou_wrap.cxx', 'src/polyiou.cpp']
+    ),
 ]
+if CUDA is not None:
+    cuda_ext_module = [
+        make_cuda_ext(
+            'poly_overlaps',
+            'cvtools.ops.polyiou',
+            sources=['src/poly_overlaps_kernel.cu', 'src/poly_overlaps.pyx']
+        ),
+        make_cuda_ext(
+            'poly_nms',
+            'cvtools.ops.polynms',
+            sources=['src/poly_nms_kernel.cu', 'src/poly_nms.pyx']
+        ),
+    ]
+    ext_modules += cuda_ext_module
 
 setup(
     name='cvtoolss',
@@ -94,7 +142,7 @@ setup(
     tests_require=['pytest'],
     install_requires=install_requires,
     ext_modules=ext_modules,
-    cmdclass={'build_ext': build_ext},
+    cmdclass={'build_ext': BuildExtension},
     zip_safe=False)
 
 """如果应用在开发过程中会频繁变更，每次安装还需要先将原来的版本卸掉，很麻烦。

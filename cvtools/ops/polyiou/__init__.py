@@ -5,7 +5,10 @@
 # @Software: PyCharm
 
 from .polyiou import VectorDouble, iou_poly
+from .polyiou_wrap import poly_overlaps
+
 
 __all__ = [
-    'VectorDouble', 'iou_poly'
+    'VectorDouble', 'iou_poly',
+    'poly_overlaps'
 ]
