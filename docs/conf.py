@@ -33,7 +33,7 @@ __version__ = locals()['__version__']
 
 # -- Project information -----------------------------------------------------
 
-project = 'cvtools'
+project = 'CVTools'
 copyright = '2019, jiang.g.f'
 author = 'jiang.g.f'
 
