@@ -13,7 +13,7 @@ cvtools -d model.py
 
 ```
 
-默认使用5000端口，可使用`-p`参数指定，Web日志以及临时文件默认输出到当前目录deploy文件夹中下，可使用-l参数指定。正确的运行结果如下：
+默认使用5000端口，可使用`-p`参数指定，Web日志以及临时文件默认输出到当前目录deploy文件夹中下，可使用`-l`参数指定。正确的运行结果如下：
 
 Linux系统
 
@@ -29,7 +29,7 @@ Windows系统
 cvtools -d model.py -p 666 -l deploy/model.log
 ```
 
--d指定的模型py代码，路径可使用相对路径，相对于cvtools命令使用的路径。模型代码必须提供`model`对象，必须有detect方法，即可以继承
+`-d`指定的模型py代码，路径可使用相对路径，相对于cvtools命令使用的路径。模型代码必须提供`model`对象，必须有detect方法，即可以继承
 `cvtools.web.model.Model`类
 
 ```python
