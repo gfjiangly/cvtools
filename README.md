@@ -21,6 +21,7 @@ It provides the following functionalities.
 - Data Augmentation(random mirror, random sample crop, ...)
 - Dataset Analysis(visualization, cluster analysis, ...)
 - Image processing(crop, resize, ...)
+- Model web deployment(command line usage)
 - Useful utilities (iou, timer, ...)
 - Universal IO APIs
 
@@ -45,7 +46,7 @@ pip install .  # (add "-e" if you want to develop or modify the codes)
 
 TodoList
 --------
-- [ ] Add web deployment models
+- [x] Add web deployment models
 
 
 License
