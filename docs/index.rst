@@ -14,6 +14,7 @@
    label_convert
    label_analysis
    data_augs
+   web
    file_io
    utils
    api
