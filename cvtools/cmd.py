@@ -91,9 +91,12 @@ def main(*argv):
     write('CVTools')
 
     if args.deploy:
-        sys.path.append(root)
-        deploy = importlib.import_module(args.deploy, package='.')
-        cvtools.run_model(deploy.model, args.port, args.log)
+        # sys.path.append(root)
+        # deploy = importlib.import_module(args.deploy, package='.')
+        with open(args.deploy, 'r') as f:
+            exec(compile(f.read(), args.deploy, 'exec'))
+        model_r = locals()['model']
+        cvtools.run_model(model_r, args.port, args.log)
 
 
 if __name__ == '__main__':
