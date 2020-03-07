@@ -41,10 +41,12 @@ class Timer(object):
     def tic(self):
         # using time.time instead of time.clock because time time.clock
         # does not normalize for multithreading
-        self.start_time = time.time()
+        # self.start_time = time.time()
+        self.start_time = time.perf_counter()
 
     def toc(self, average=True):
-        self.diff = time.time() - self.start_time
+        # self.diff = time.time() - self.start_time
+        self.diff = time.perf_counter() - self.start_time
         self.total_time += self.diff
         self.calls += 1
         self.average_time = self.total_time / self.calls

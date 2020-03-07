@@ -27,7 +27,8 @@ install_requires = [
     # 'scikit-learn>=0.21.2',
     'shapely>=1.6.4',
     'terminaltables',
-    'flask'
+    'flask',
+    'requests'
 ]
 
 

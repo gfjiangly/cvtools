@@ -9,3 +9,4 @@ mmcv>=0.2.10
 shapely>=1.6.4
 terminaltables
 flask
+requests
