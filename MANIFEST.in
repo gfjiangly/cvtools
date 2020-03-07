@@ -1,1 +1,9 @@
 include cvtools/cocotools/*.h
+include cvtools/cocotools/*.pyx
+include cvtools/ops/nms/src/*.pyx
+include cvtools/ops/polyiou/src/*.hpp
+include cvtools/ops/polyiou/src/*.h
+include cvtools/ops/polyiou/src/*.pyx
+include cvtools/ops/polynms/src/*.hpp
+include cvtools/ops/polynms/src/*.pyx
+include cpp_extension.py
