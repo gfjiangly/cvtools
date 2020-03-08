@@ -10,8 +10,6 @@ cache:
   pip: true
 python:
   - '3.5'
-  - '3.6'
-  - '3.7'
 #script: coverage run -m pytest
 #script: python -m pytest --cov=cvtools
 #after_success: codecov
