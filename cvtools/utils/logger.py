@@ -2,7 +2,7 @@
 # @Time    : 2019/9/20 22:09
 # @Author  : gfjiang
 # @Site    : 
-# @File    : logging.py
+# @File    : logger.py
 # @Software: PyCharm
 import logging
 

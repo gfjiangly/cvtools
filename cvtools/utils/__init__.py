@@ -23,7 +23,7 @@ from .iou import bbox_overlaps
 from .misc import (is_str, iter_cast, list_cast, tuple_cast, is_seq_of,
                    is_list_of, is_tuple_of, slice_list, concat_list,
                    is_array_like)
-from .logging import get_logger, logger_file_handler
+from .logger import get_logger, logger_file_handler
 # from .cpp_extension import BuildExtension, CUDAExtension, CppExtension
 
 
