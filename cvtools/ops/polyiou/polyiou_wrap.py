@@ -51,7 +51,7 @@ def poly_overlaps(a, b, force_cpu=False):
     if len(a) == 0 or len(b) == 0:
         return np.empty(shape=(len(a), len(b)))
     if poly_overlaps_gpu is not None and not force_cpu:
-        return poly_overlaps_cpu(a, b)
+        return poly_overlaps_gpu(a, b)
     else:
         # raise NotImplemented("poly_overlaps的cpu版本暂未实现！")
         return poly_overlaps_cpu(a, b)

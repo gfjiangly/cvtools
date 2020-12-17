@@ -7,7 +7,7 @@
 import numpy as np
 
 import cvtools
-from cvtools.evaluation.merge_dets import MergeCropDetResults
+from cvtools.evaluation.merge_crop_dets import MergeCropDetResults
 from cvtools.evaluation.mean_ap import eval_map
 from cvtools.utils.iou import bbox_overlaps
 from cvtools.ops.polynms import poly_nms
@@ -85,3 +85,37 @@ if __name__ == '__main__':
     eval_crop_quality = EvalCropQuality(anns, crop_anns, results,
                                         num_coors=8)
     mean_ap, eval_results = eval_crop_quality.eval()
+    """
+    outputs:
+        No module named 'cvtools.ops.polyiou.poly_overlaps'
+        No module named 'cvtools.ops.polynms.poly_nms'
+        loading annotations into memory...
+        Done (t=0.40s)
+        creating index...
+        index created!
+        loading annotations into memory...
+        Done (t=0.21s)
+        creating index...
+        index created!
+        +--------------------+------+-------+--------+-----------+-------+
+        | class              | gts  | dets  | recall | precision | ap    |
+        +--------------------+------+-------+--------+-----------+-------+
+        | large-vehicle      | 4387 | 19356 | 0.893  | 0.202     | 0.824 |
+        | swimming-pool      | 440  | 3043  | 0.786  | 0.114     | 0.603 |
+        | helicopter         | 73   | 1214  | 0.411  | 0.025     | 0.157 |
+        | bridge             | 464  | 16303 | 0.653  | 0.019     | 0.398 |
+        | plane              | 2531 | 9607  | 0.944  | 0.249     | 0.924 |
+        | ship               | 8960 | 22159 | 0.814  | 0.329     | 0.776 |
+        | soccer-ball-field  | 153  | 3680  | 0.458  | 0.019     | 0.302 |
+        | basketball-court   | 132  | 1707  | 0.773  | 0.060     | 0.662 |
+        | ground-track-field | 144  | 2671  | 0.590  | 0.032     | 0.495 |
+        | small-vehicle      | 5438 | 28363 | 0.758  | 0.145     | 0.494 |
+        | harbor             | 2090 | 10070 | 0.714  | 0.148     | 0.633 |
+        | baseball-diamond   | 214  | 1887  | 0.883  | 0.100     | 0.782 |
+        | tennis-court       | 760  | 2993  | 0.930  | 0.236     | 0.923 |
+        | roundabout         | 179  | 3829  | 0.799  | 0.037     | 0.665 |
+        | storage-tank       | 2888 | 13410 | 0.827  | 0.178     | 0.776 |
+        +--------------------+------+-------+--------+-----------+-------+
+        | mAP                |      |       |        |           | 0.628 |
+        +--------------------+------+-------+--------+-----------+-------+
+    """

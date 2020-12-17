@@ -162,7 +162,7 @@ def tpfp_default(det_bboxes, gt_bboxes, gt_ignore, iou_thr, area_ranges=None,
     # a certain scale
     tp = np.zeros((num_scales, num_dets), dtype=np.float32)
     fp = np.zeros((num_scales, num_dets), dtype=np.float32)
-    if det_bboxes.shape[0] == 0:
+    if det_bboxes.shape[0] == 0:  # 可能存在bug，待确认
         return tp, fp
     # if there is no gt bboxes in this image, then all det bboxes
     # within area range are false positives
@@ -245,11 +245,12 @@ def eval_map(det_results,
         gt_labels (list): ground truth labels of each image, a list of K array
         gt_ignore (list): gt ignore indicators of each image, a list of K array
         scale_ranges (list, optional): [(min1, max1), (min2, max2), ...]
-        iou_thr (float): IoU threshold，目前还不支持polyiou
+        iou_thr (float): IoU threshold
         dataset (None or str or list): dataset name or dataset classes, there
             are minor differences in metrics for different datsets, e.g.
             "voc07", "imagenet_det", etc.
         print_summary (bool): whether to print the mAP summary
+        calc_ious: 由用户传入IOU计算方法函数
 
     Returns:
         tuple: (mAP, [dict, dict, ...])
@@ -286,6 +287,7 @@ def eval_map(det_results,
             if area_ranges is None:
                 num_gts[0] += np.sum(np.logical_not(cls_gt_ignore[j]))
             else:
+                # 对于poly这里计算不正确，待修复，只有统计大中小目标AP时才会执行到这里
                 gt_areas = (bbox[:, 2] - bbox[:, 0] + 1) * (
                     bbox[:, 3] - bbox[:, 1] + 1)
                 for k, (min_area, max_area) in enumerate(area_ranges):
