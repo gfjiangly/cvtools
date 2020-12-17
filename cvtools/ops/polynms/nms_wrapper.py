@@ -1,7 +1,8 @@
 try:
     from .poly_nms import poly_gpu_nms
-except ImportError:
+except ImportError as e:
     poly_gpu_nms = None
+    print(e)
 
 
 def poly_nms(dets, thresh, force_cpu=False):

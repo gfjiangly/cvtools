@@ -7,8 +7,9 @@ import numpy as np
 
 try:
     from .poly_overlaps import poly_overlaps as poly_overlaps_gpu
-except ImportError:
+except ImportError as e:
     poly_overlaps_gpu = None
+    print(e)
 
 from .polyiou import VectorDouble, iou_poly
 
@@ -45,7 +46,12 @@ def poly_overlaps_cpu(polygons1, polygons2, mode='iou'):
 
 
 def poly_overlaps(a, b, force_cpu=False):
+    a = a.astype(np.float32)[:, :8]
+    b = b.astype(np.float32)[:, :8]
+    if len(a) == 0 or len(b) == 0:
+        return np.empty(shape=(len(a), len(b)))
     if poly_overlaps_gpu is not None and not force_cpu:
-        poly_overlaps_gpu(a, b)
+        return poly_overlaps_cpu(a, b)
     else:
-        raise NotImplemented("poly_overlaps的cpu版本暂未实现！")
+        # raise NotImplemented("poly_overlaps的cpu版本暂未实现！")
+        return poly_overlaps_cpu(a, b)

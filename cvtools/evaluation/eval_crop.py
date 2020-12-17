@@ -30,7 +30,7 @@ class EvalCropQuality(object):
         if self.num_coors == 4:
             self.nms = cvtools.py_cpu_nms
         else:
-            self.nms = poly_nms.poly_gpu_nms
+            self.nms = poly_nms
         self.results = results
         if cvtools.is_str(crop_ann_file):
             if results is None:
@@ -72,5 +72,16 @@ class EvalCropQuality(object):
                     np.empty((0, self.num_coors+1))
             det_results.append(dets)
 
-        eval_map(det_results, gt_bboxes, gt_labels, dataset='dota',
-                 calc_ious=self.calc_ious)
+        return eval_map(det_results, gt_bboxes, gt_labels, dataset='dota',
+                        calc_ious=self.calc_ious)
+
+
+if __name__ == '__main__':
+    anns = '../../tests/data/DOTA/eval/val_dota_original.json'
+    crop_anns = '../../tests/data/DOTA/eval/val_dota_crop800.json'
+    crop_anns = cvtools.COCO(crop_anns)
+    results = '../../tests/data/DOTA/eval/dets.pkl'
+    results = cvtools.load_pkl(results)
+    eval_crop_quality = EvalCropQuality(anns, crop_anns, results,
+                                        num_coors=8)
+    mean_ap, eval_results = eval_crop_quality.eval()
