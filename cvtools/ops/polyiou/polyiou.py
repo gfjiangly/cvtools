@@ -229,6 +229,7 @@ class VectorDouble(object):
 _polyiou.VectorDouble_swigregister(VectorDouble)
 
 
+# 8参数表示法，不支持向量化计算
 def iou_poly(p, q):
     return _polyiou.iou_poly(p, q)
 
