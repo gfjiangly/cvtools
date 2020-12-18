@@ -9,7 +9,7 @@ polyiou只能计算两个单OBB的IOU
 poly_overlaps可以矢量化计算OBB的IOU，但形式需要是5参数旋转角表示
 """
 # try:
-#     from .poly_overlaps import poly_overlaps as poly_overlaps_gpu
+#     from .poly_overlaps import poly_overlaps8 as poly_overlaps_gpu
 # except ImportError as e:
 #     poly_overlaps_gpu = None
 #     print(e)

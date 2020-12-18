@@ -32,15 +32,11 @@ class EvalDOTADets:
         gt_bboxes = []
         gt_labels = []
         # img_id顺序佷重要
-        i = 0
         for img_id, img_info in self.anns_like_coco.imgs.items():
             ann_ids = self.anns_like_coco.getAnnIds(imgIds=[img_id])
             anns = self.anns_like_coco.loadAnns(ann_ids)
             gt_bboxes.append(np.array([ann['segmentation'][0] for ann in anns]))
             gt_labels.append(np.array([ann['category_id'] for ann in anns]))
-            i += 1
-            if i == 100:
-                break
         return gt_bboxes, gt_labels
 
     def eval(self):
@@ -49,7 +45,7 @@ class EvalDOTADets:
 
 
 if __name__ == '__main__':
-    dets_dict = '../../tests/data/DOTA/eval/croped_dets.pkl'
+    dets_dict = '../../tests/data/DOTA/eval/val_cropped_dets.pkl'
     anns = '../../tests/data/DOTA/eval/DOTA_val1024.json'
     eval_data_dets = EvalDOTADets(dets_dict, anns)
     eval_data_dets.eval()
