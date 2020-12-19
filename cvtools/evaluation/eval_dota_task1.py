@@ -6,6 +6,7 @@
 # @Software: PyCharm
 from argparse import ArgumentParser
 import numpy as np
+from terminaltables import AsciiTable
 
 from cvtools.ops.polyiou import polyiou
 
@@ -251,10 +252,10 @@ def voc_eval(detpath,
 
     # compute precision recall
 
-    print('check fp:', int(np.sum(fp)))
-    print('check tp', int(np.sum(tp)))
+    # print('check fp:', int(np.sum(fp)))
+    # print('check tp', int(np.sum(tp)))
 
-    print('npos num:', npos)
+    # print('npos num:', npos)
     fp = np.cumsum(fp)
     tp = np.cumsum(tp)
 
@@ -288,7 +289,7 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
     classaps = []
     map = 0
     for classname in classnames:
-        print('classname:', classname)
+        # print('classname:', classname)
         if classname in cls_det_thres:
             score_thres = cls_det_thres[classname]
         else:
@@ -302,7 +303,7 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
                                  det_thresh=score_thres)
         map = map + ap
         # print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
-        print('ap: ', ap)
+        # print('ap: ', ap)
         classaps.append(ap)
 
         # umcomment to show p-r curve of each category
@@ -312,17 +313,36 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
         # plt.plot(rec, prec)
         # plt.show()
     map = map / len(classnames)
-    print('map:', map)
+    # print('map:', map)
     classaps = 100 * np.array(classaps)
     # np.set_printoptions(precision=2)
-    sort_ids = np.argsort(classaps)
+
+    # print ap
+    # header = ['mAP'] + classnames
+    # body = [map*100] + classaps.tolist()
+    # body = ['{:.2f}'.format(x) for x in body]
+    # table_data = [header, body]
+    # table = AsciiTable(table_data)
+    # table.inner_footing_row_border = True
+    # print(table.table)
+
+    header = ['class', 'ap']
+    table_data = [header]
+
+    # sort_ids = np.argsort(classaps)
+    sort_ids = range(len(classaps))
     import os.path as osp
     with open(osp.join(osp.dirname(det_path), 'results.txt'), 'w') as f:
         f.write('map: {}\n'.format(map))
         for id in sort_ids:
             line = '{}: {:.2f}'.format(classnames[id], classaps[id])
-            print(line, end=' ')
+            # print(line, end=' ')
             f.write(line+'\n')
+            table_data.append([classnames[id], '{:.2f}'.format(classaps[id])])
+    table_data.append(['mAP', '{:.2f}'.format(map*100)])
+    table = AsciiTable(table_data)
+    table.inner_footing_row_border = True
+    print(table.table)
 
 
 def main():
