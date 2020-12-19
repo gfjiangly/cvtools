@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 # @Time    : 2020/12/17 20:48
 # @Author  : jiang.g.f
+from argparse import ArgumentParser
 import numpy as np
 import cvtools
 
@@ -44,8 +45,18 @@ class EvalDOTADets:
                         dataset='dota', calc_ious=poly_overlaps)
 
 
-if __name__ == '__main__':
-    dets_dict = '../../tests/data/DOTA/eval/val_cropped_dets.pkl'
-    anns = '../../tests/data/DOTA/eval/DOTA_val1024.json'
-    eval_data_dets = EvalDOTADets(dets_dict, anns)
+def main():
+    parser = ArgumentParser(description='DOTA Evaluation')
+    parser.add_argument('det', help='result file path')
+    parser.add_argument('ann', help='annotation file path')
+    args = parser.parse_args()
+    eval_data_dets = EvalDOTADets(args.det, args.ann)
     eval_data_dets.eval()
+
+
+if __name__ == '__main__':
+    # dets_dict = '../../tests/data/DOTA/eval/val_cropped_dets.pkl'
+    # anns = '../../tests/data/DOTA/eval/DOTA_val1024.json'
+    # eval_data_dets = EvalDOTADets(dets_dict, anns)
+    # eval_data_dets.eval()
+    main()
