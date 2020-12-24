@@ -7,6 +7,8 @@
 from argparse import ArgumentParser
 import numpy as np
 from terminaltables import AsciiTable
+import matplotlib
+import matplotlib.pyplot as plt
 
 from cvtools.ops.polyiou import polyiou
 
@@ -46,6 +48,54 @@ def parse_gt(filename):
     return objects
 
 
+def draw_precision_recall_curve(precisions, recalls, classes, idxs, legend_out=True, to_file=None):
+
+    fig, ax = plt.subplots()
+    # plt.rcParams['figure.figsize'] = (6.0, 3.5) # 设置figure_size尺寸
+    # plt.rcParams['savefig.dpi'] = 300 #图片像素
+    # plt.rcParams['figure.dpi'] = 300 #分辨率
+
+    classes_sort = []
+    for i in idxs:
+        classes_sort.append(classes[i])
+        mrec = np.concatenate(([0.], recalls[i], [1.]))
+        mpre = np.concatenate(([0.], precisions[i], [0.]))
+
+        # compute the precision envelope
+        for k in range(mpre.size - 1, 0, -1):
+            mpre[k - 1] = np.maximum(mpre[k - 1], mpre[k])
+
+        # to calculate area under PR curve, look for points
+        # where X axis (recall) changes value
+        idxs = np.where(mrec[1:] != mrec[:-1])[0]
+
+        plt.plot(mrec[idxs], mpre[idxs])
+
+    # plt.plot(recalls, precisions)
+    # 显示图标题
+    plt.title('Precision x Recall curve')
+    # 显示横轴标签
+    font = {
+        'family' : 'Times New Roman',
+        'weight' : 'normal',
+        'size'   : 12,
+    }
+    plt.xlabel('recall', font)
+    # 显示纵轴标签
+    plt.ylabel('precision', font)
+    # plt.xlim(0., 1.)
+    if legend_out:
+        plt.legend(labels=classes_sort, bbox_to_anchor=(1.05, 0.), loc=3, borderaxespad=0,
+                prop={'size': 7})
+        fig.subplots_adjust(right=0.7)
+    else:
+        plt.legend(labels=classes_sort, loc='best')
+    
+    # plt.show()
+    if to_file:
+        plt.savefig(to_file, dpi=300, bbox_inches='tight')
+
+
 def voc_ap(rec, prec, use_07_metric=False):
     """ ap = voc_ap(rec, prec, [use_07_metric])
     Compute VOC AP given precision and recall.
@@ -74,6 +124,8 @@ def voc_ap(rec, prec, use_07_metric=False):
         # to calculate area under PR curve, look for points
         # where X axis (recall) changes value
         i = np.where(mrec[1:] != mrec[:-1])[0]
+
+        # draw_precision_recall_curve(mpre[i], mrec[i], 'pr.jpg')
 
         # and sum (\Delta recall) * prec
         ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1])
@@ -288,6 +340,8 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
     cls_det_thres = {'plane': 0.01}
     classaps = []
     map = 0
+    recs = []
+    precs = []
     for classname in classnames:
         # print('classname:', classname)
         if classname in cls_det_thres:
@@ -305,6 +359,8 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
         # print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
         # print('ap: ', ap)
         classaps.append(ap)
+        recs.append(rec)
+        precs.append(prec)
 
         # umcomment to show p-r curve of each category
         # plt.figure(figsize=(8,4))
@@ -312,6 +368,13 @@ def eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.3):
         # plt.ylabel('precision')
         # plt.plot(rec, prec)
         # plt.show()
+
+    ap_idxs = np.array(classaps).argsort()[::-1]
+    first3_last3 = np.concatenate([ap_idxs[:3], ap_idxs[-3:]])
+    draw_precision_recall_curve(precs, recs, classnames, first3_last3, legend_out=False, to_file='pr_first3_last3_in.jpg')
+    # draw_precision_recall_curve(precs, recs, classnames, ap_idxs[:3], legend_out=False, to_file='pr_first3.jpg')
+    # draw_precision_recall_curve(precs, recs, classnames, ap_idxs[::-1][:3],  legend_out=False, to_file='pr_last3.jpg')
+
     map = map / len(classnames)
     # print('map:', map)
     classaps = 100 * np.array(classaps)
@@ -356,7 +419,8 @@ def main():
 
 
 if __name__ == '__main__':
-    # det_path = r'/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_rotate/Task1_results_nms'
+    # # det_path = r'../../tests/data/DOTA/eval/Task1_results_nms'
+    # det_path = r'/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt/Task1_results_nms'
     # ann_path = r'/media/data/DOTA/val/labelTxt-v1.0/labelTxt'
     # imageset_file = r'/media/data/DOTA/val/val.txt'
     # eval_dota_task1(det_path, ann_path, imageset_file, det_thresh=0.05)

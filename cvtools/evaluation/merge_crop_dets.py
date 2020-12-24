@@ -6,9 +6,11 @@
 import numpy as np
 from collections import defaultdict
 import os.path as osp
+import re
 
 import cvtools
 from cvtools.ops.nms import py_cpu_nms
+from cvtools.ops.polynms import poly_nms
 
 
 class MergeCropDetResults(object):
@@ -129,7 +131,12 @@ def crop_bbox_map_back(bb, crop_start):
 class CroppedDets:
     """New! 将裁剪数据集检测结果转成原始数据集检测结果"""
 
-    def __init__(self, cropped_dets, img_infos, num_coors=4):
+    def __init__(self, 
+                 cropped_dets, 
+                 img_infos, 
+                 num_coors,
+                 nms_method=None,
+                 nms_th=0.1):
         """
 
         Args:
@@ -174,17 +181,54 @@ class CroppedDets:
                 位置坐标支持左上角右下角两个点表示和四个点的表示方式
             num_coors (int): 4表示左上角右下角box， 8表示四个点的box
         """
-        assert num_coors in (4, 8), "不支持的检测位置表示"
+        assert num_coors in (4, 8), "不支持的检测结果表示"
+        self.num_coors = num_coors
+        if nms_method is None:
+            if self.num_coors == 4:
+                self.nms_method = py_cpu_nms
+            else:
+                self.nms_method = poly_nms
+        else:
+            self.nms_method = nms_method
+        self.nms_th = nms_th
         self.cropped_dets = cropped_dets
         self.img_infos = img_infos
         if cvtools.is_str(cropped_dets):
             self.cropped_dets = cvtools.load_pkl(cropped_dets)
         if cvtools.is_str(img_infos):
             self.img_infos = cvtools.COCO(img_infos)
-        self.num_coors = num_coors
-        self.img_to_dets = self.merge()
+        assert isinstance(self.cropped_dets, (list, dict))
+        if isinstance(self.cropped_dets, list):
+            self.cropped_dets_list = self.cropped_dets
+            self.cropped_dets_dict = self.list_to_dict(self.cropped_dets)
+        else:
+            self.cropped_dets_dict = self.cropped_dets
+            self.cropped_dets_list = self.dict_to_list(self.cropped_dets)
+        self.ori_dets_dict = self.merge()
+        self.ori_dets_list = self.dict_to_list(self.ori_dets_dict)
+    
+    def list_to_dict(self, results_list):
+        results_dict = {}
+        for idx in range(len(self.img_infos.dataset['images'])):
+            img_info = self.img_infos.dataset['images'][idx]
+            image_id = img_info['id']
+            result = results_list[idx]
+            cls_to_dets = {}
+            for cls_id, cls_det in zip(self.img_infos.cats, result):
+                cls_to_dets[cls_id] = cls_det
+            results_dict[image_id] = cls_to_dets
+        return results_dict
 
-    def merge(self, nms_method=py_cpu_nms, nms_th=0.15):
+    def dict_to_list(self, results_dict):
+        results_list = []
+        for cls_dets in results_dict.values():
+            cls_results = []
+            for dets in cls_dets.values():
+                cls_results.append(dets)
+            results_list.append(cls_results)
+        return results_list
+
+    def merge(self):
         """
 
         Args:
@@ -194,26 +238,35 @@ class CroppedDets:
 
         Returns: 合并后的检测结果
             {
-                filename: [bboxes, labels, scores],
-                filename: [bboxes, labels, scores],
+                ori_img1_name: {
+                    cls1: dets,      # dets: np.array [坐标(长度为4或8)，得分]
+                    cls2: dets,
+                    ...
+                },
+                ori_img2_name: {
+                    cls1: dets,
+                    cls2: dets,
+                    ... 
+                },
                 ...
             }
         """
-        img_to_dets = dict()  # 保存merge后结果
-
-        # 按img_name汇集dets，并转换到原图坐标
+        # 按ori_img_name汇集dets，并转换到原图坐标，注意image_id是子图id
         tmp_img_dets = defaultdict(list)
-        for image_id, dets in self.cropped_dets.items():
+        for image_id, dets in self.cropped_dets_dict.items():
             img_info = self.img_infos.imgs[image_id]
+            filename, _ = osp.splitext(img_info['file_name'])
             if 'crop' in img_info:
                 start_point = img_info['crop'][:2]
-                img_name = img_info['file_name']
+                ori_img_name = filename
             else:
                 # 待测试
-                filename, ext = osp.splitext(img_info['file_name'])
-                crop_info = filename.split('_')[-4:]
+                # crop_info = filename.split('_')[-4:]
+                ori_img_name = filename.split('__')[0]
+                pattern1 = re.compile(r'__\d+___\d+')
+                x_y = re.findall(pattern1, filename)
+                crop_info = re.findall(r'\d+', x_y[0])
                 start_point = (int(crop_info[0]), int(crop_info[1]))
-                img_name = filename[:-4] + ext
             cls_det = dict()  # 单张子图所有类别检测结果
             for cls_id, det in dets.items():
                 if len(det) > 0:
@@ -221,58 +274,90 @@ class CroppedDets:
                     det = np.hstack([bboxes, det[:, [-1]]])
                 cls_det[cls_id] = det
             # 用于容纳一张大图的所有子图检测结果
-            tmp_img_dets[img_name].append(cls_det)
+            tmp_img_dets[ori_img_name].append(cls_det)
 
         # 按类别合并子图结果
-        for img_name, original_dets in tmp_img_dets.items():
-            """
+        ori_img_cls_dets = dict()
+        for ori_img_name, ori_dets in tmp_img_dets.items():
+            """tmp_img_dets:
             {
-                img1_name: [  # 大图1
-                    dets,     # 子图1结果，dict
-                    dets,     # 子图2结果，dict
+                ori_img1_name: [        # 大图1
+                    cls_dets,           # 子图1结果，dict
+                    cls_dets,           # 子图2结果，dict
                     ...,
                 ]，
-                img2_name: [  # 大图2
-                    dets,     # 子图1结果，dict
-                    dets,     # 子图2结果，dict
+                ori_img2_name: [    # 大图2
+                    cls_dets,           # 子图1结果，dict
+                    cls_dets,           # 子图2结果，dict
                     ...,
                 ]
             }
             """
             # original_dets（List）：单张大图中所有子图所有类别检测结果
-            original_dets_by_cls = dict()  # 按类别存放original_dets
-            for sub_dets in original_dets:
-                for cls, det in sub_dets.items():
-                    if cls not in original_dets_by_cls:
-                        original_dets_by_cls[cls] = [det]
+            ori_dets_by_cls = dict()  # 按类别存放original_dets
+            for sub_dets in ori_dets:
+                for cls_id, det in sub_dets.items():
+                    if cls_id not in ori_dets_by_cls:
+                        ori_dets_by_cls[cls_id] = [det]
                     else:
-                        original_dets_by_cls[cls].append(det)
-            for cls, dets in original_dets_by_cls.items():
-                original_dets_by_cls[cls] = np.vstack(dets)
-            img_to_dets[img_name] = original_dets_by_cls
+                        ori_dets_by_cls[cls_id].append(det)
+            for cls_id, dets in ori_dets_by_cls.items():
+                ori_dets_by_cls[cls_id] = np.vstack(dets)
+            ori_img_cls_dets[ori_img_name] = ori_dets_by_cls
 
-        # 同一类在大图上做NMS
-        for img_name, img_dets in img_to_dets.items():
-            for cls, dets in img_dets.items():
-                ids = nms_method(dets, nms_th)
-                img_dets[cls] = dets[ids]
-            img_to_dets[img_name] = img_dets
+        # 在大图上按类别做NMS
+        for ori_img_name, cls_dets in ori_img_cls_dets.items():
+            for cls_id, dets in cls_dets.items():
+                ids = self.nms_method(dets, self.nms_th)
+                cls_dets[cls_id] = dets[ids]
+            ori_img_cls_dets[ori_img_name] = cls_dets
 
-        return img_to_dets
+        return ori_img_cls_dets
 
-    def to_original_dets_list(self):
-        # 类别list序号顺序必须与cls_id顺序一致
-        # 字典循环访问时，需要先对image_id和cls_id排序，以防止访问顺序不对
-        pass
+    def to_original_dets_list(self, to_file='dets_list.pkl'):
+        cvtools.dump_pkl(self.ori_dets_list, to_file)
+        print('original dets are saved in {}'.format(to_file))
 
     def to_original_dets_dict(self, to_file='dets_dict.pkl'):
-        cvtools.dump_pkl(self.img_to_dets, to_file)
-        print('dets are saved in {}'.format(to_file))
+        cvtools.dump_pkl(self.ori_dets_dict, to_file)
+        print('original dets are saved in {}'.format(to_file))
+    
+    def save_dota_format(self, save_dir):
+        cat_results = defaultdict(lambda: defaultdict())
+        for ori_img_name, cls_dets in self.ori_dets_dict.items():
+            for cls_id, dets in cls_dets.items():
+                cat_results[cls_id][ori_img_name] = dets
+        for cls_id, img_dets in cat_results.items():
+            cls_name = self.img_infos.cats[cls_id]['name']
+            lines = []
+            for ori_img_name, dets in img_dets.items():
+                sorted_ind = np.argsort(-dets[:, -1])
+                dets = dets[sorted_ind]
+                for det in dets:
+                    bbox = list(map(str, det[:-1]))
+                    score = str(det[-1])
+                    lines.append(' '.join([ori_img_name] + [score] + bbox))
+            cvtools.write_list_to_file(
+                lines, osp.join(save_dir, cls_name + '.txt'))
+        print('original dets are saved in {}'.format(save_dir))
 
 
 if __name__ == '__main__':
-    ann_file = '../../tests/data/DOTA/eval/val_dota_crop800_no_anns.json'
-    croped_dets = '../../tests/data/DOTA/eval/dets.pkl'
-    dets = CroppedDets(croped_dets, ann_file)
-    dets.to_original_dets_dict(
-        '../../tests/data/DOTA/eval/ori_dets_dict.pkl')
+    # # 测试无标注json和保存原图结果
+    # ann_file = '../../tests/data/DOTA/eval/DOTA_val1024.json'
+    # croped_dets = '../../tests/data/DOTA/eval/color_val1024_cropped_dets.pkl'
+    # # ann_file = '../../tests/data/DOTA/eval/val_dota_crop800_no_anns.json'
+    # # croped_dets = '../../tests/data/DOTA/eval/dets.pkl'
+    # dets = CroppedDets(croped_dets, ann_file, num_coors=8)
+    # dets.to_original_dets_dict(
+    #     '../../tests/data/DOTA/eval/ori_dets_dict.pkl')
+    # dets.to_original_dets_list(
+    #     '../../tests/data/DOTA/eval/ori_dets_list.pkl')
+    # dets.save_dota_format(
+    #     '../../tests/data/DOTA/eval/Task1_results_nms')
+
+    # convert to dota txt format
+    ann_file = '/media/data/DOTA/annotations/val_dota_adap.json'
+    cropped_dets = '/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt/val_cropped_dets.pkl'
+    dets = CroppedDets(cropped_dets, ann_file, num_coors=8)
+    dets.save_dota_format('/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt/Task1_results_nms')
