@@ -136,7 +136,8 @@ class CroppedDets:
                  img_infos, 
                  num_coors,
                  nms_method=None,
-                 nms_th=0.1):
+                 nms_th=0.1,
+                 classes=None):
         """
 
         Args:
@@ -206,6 +207,15 @@ class CroppedDets:
             self.cropped_dets_list = self.dict_to_list(self.cropped_dets)
         self.ori_dets_dict = self.merge()
         self.ori_dets_list = self.dict_to_list(self.ori_dets_dict)
+        self.new_classes_map = self.remap_classes(classes)
+    
+    def remap_classes(self, classes=None):
+        old_classes = [cat['name'] for cat in self.img_infos.cats.values()]
+        if classes is not None:
+            new_classes_map = dict(zip(old_classes, classes))
+        else:
+            new_classes_map = dict(zip(old_classes, old_classes))
+        return new_classes_map
     
     def list_to_dict(self, results_list):
         results_dict = {}
@@ -329,6 +339,7 @@ class CroppedDets:
                 cat_results[cls_id][ori_img_name] = dets
         for cls_id, img_dets in cat_results.items():
             cls_name = self.img_infos.cats[cls_id]['name']
+            cls_name = self.new_classes_map[cls_name]
             lines = []
             for ori_img_name, dets in img_dets.items():
                 sorted_ind = np.argsort(-dets[:, -1])
@@ -357,7 +368,15 @@ if __name__ == '__main__':
     #     '../../tests/data/DOTA/eval/Task1_results_nms')
 
     # convert to dota txt format
-    ann_file = '/media/data/DOTA/annotations/val_dota_adap.json'
-    cropped_dets = '/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt/val_cropped_dets.pkl'
-    dets = CroppedDets(cropped_dets, ann_file, num_coors=8)
-    dets.save_dota_format('/code/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt/Task1_results_nms')
+    ann_file = '/media/data/DOTA/dota1_1024/val1024/DOTA_val1024.json'
+    cropped_dets = '/code/test_AerialDetection/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt_over1/val_cropped_dets.pkl'
+    dets = CroppedDets(cropped_dets, ann_file, num_coors=8, classes=[
+        'large-vehicle', 'swimming-pool',
+        'helicopter', 'bridge',
+        'plane', 'ship',
+        'soccer-ball-field', 'basketball-court',
+        'ground-track-field', 'small-vehicle',
+        'harbor', 'baseball-diamond',
+        'tennis-court', 'roundabout',
+        'storage-tank'])
+    dets.save_dota_format('/code/test_AerialDetection/AerialDetection/work_dirs/retinanet_obb_r50_fpn_1x_dota_1gpus_adapt_over1/Task1_results_nms')
