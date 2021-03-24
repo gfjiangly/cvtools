@@ -40,18 +40,20 @@ class EvalDOTADets:
             gt_labels.append(np.array([ann['category_id'] for ann in anns]))
         return gt_bboxes, gt_labels
 
-    def eval(self):
+    def eval(self, dataset='dota'):
         return eval_map(self.dets, self.gt_bboxes, self.gt_labels,
-                        dataset='dota', calc_ious=poly_overlaps)
+                        dataset=dataset, calc_ious=poly_overlaps)
 
 
 def main():
     parser = ArgumentParser(description='DOTA Evaluation')
     parser.add_argument('det', help='result file path')
     parser.add_argument('ann', help='annotation file path')
+    parser.add_argument('--dataset', default='dota', 
+                        help='dataset name for class ID map')
     args = parser.parse_args()
     eval_data_dets = EvalDOTADets(args.det, args.ann)
-    eval_data_dets.eval()
+    eval_data_dets.eval(dataset=args.dataset)
 
 
 if __name__ == '__main__':

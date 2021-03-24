@@ -116,6 +116,22 @@ def gender_classes():
     ]
 
 
+def hrsc2016_L1_classes():
+    return ['ship',]
+
+
+def hrsc2016_L2_classes():
+    return [
+        'ship', 'aircraft carrier',  'merchant ship', 'warcraft'
+    ]
+
+
+def hrsc2016_L3_classes():
+    return [
+        'male', 'female'
+    ]
+
+
 dataset_aliases = {
     'voc': ['voc', 'pascal_voc', 'voc07', 'voc12'],
     'imagenet_det': ['det', 'imagenet_det', 'ilsvrc_det'],
@@ -124,7 +140,9 @@ dataset_aliases = {
     'wider_face': ['WIDERFaceDataset', 'wider_face', 'WDIERFace'],
     'gender': ['gender'],
     'dota': ['dota'],
-    'dota2': ['dota2']
+    'dota2': ['dota2'],
+    'hrsc2016_L1': ['hrsc_L1', 'hrsc2016_L1'],
+    'hrsc2016_L2': ['hrsc_L2', 'hrsc2016_L2'],
 }
 
 

@@ -287,7 +287,7 @@ def eval_map(det_results,
             if area_ranges is None:
                 num_gts[0] += np.sum(np.logical_not(cls_gt_ignore[j]))
             else:
-                # 对于poly这里计算不正确，待修复，只有统计大中小目标AP时才会执行到这里
+                # TODO: 对于poly这里计算不正确，待修复，只有统计大中小目标AP时才会执行到这里
                 gt_areas = (bbox[:, 2] - bbox[:, 0] + 1) * (
                     bbox[:, 3] - bbox[:, 1] + 1)
                 for k, (min_area, max_area) in enumerate(area_ranges):
